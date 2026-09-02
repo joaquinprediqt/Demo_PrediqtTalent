@@ -8,12 +8,24 @@ Thumbs.db
 
 # Dependencies
 node_modules/
-venv/
-__pycache__/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
 
 # Env
 .env
 .env.local
+.env*.local
 
 # Logs
 *.log
+npm-debug.log*
+
+# Misc
+.vercel
+*.tsbuildinfo
