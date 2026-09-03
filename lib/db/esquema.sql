@@ -124,3 +124,21 @@ CREATE TABLE IF NOT EXISTS sincronizaciones (
   origen    TEXT NOT NULL,
   hecha_en  TEXT NOT NULL
 );
+
+-- Catalogo de Prediqt Academy (Moodle en academy.prediqt.ec).
+-- moodle_id es el id real del curso en esa instalacion.
+CREATE TABLE IF NOT EXISTS cursos (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  moodle_id   INTEGER NOT NULL UNIQUE,
+  titulo      TEXT    NOT NULL,
+  descripcion TEXT    NOT NULL DEFAULT '',
+  etiquetas   TEXT    NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS inscripciones (
+  usuario_id     INTEGER NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  curso_id       INTEGER NOT NULL REFERENCES cursos(id)   ON DELETE CASCADE,
+  avance         INTEGER NOT NULL DEFAULT 0 CHECK (avance BETWEEN 0 AND 100),
+  actualizado_en TEXT    NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (usuario_id, curso_id)
+);

@@ -11,19 +11,20 @@ export const NAV_POR_ROL: Readonly<Record<Rol, readonly EnlaceNav[]>> = {
   empleado: [
     { etiqueta: "Inicio", href: "/seleccionar-modulo" },
     { etiqueta: "Mi perfil", href: "/perfil" },
-    { etiqueta: "Learning", href: "/perfil", inactivo: true },
+    { etiqueta: "Learning", href: "/learning" },
   ],
   reclutador: [
     { etiqueta: "Dashboard", href: "/dashboard" },
     { etiqueta: "Buscar talento", href: "/buscar-talento" },
     { etiqueta: "Asistente", href: "/asistente" },
-    { etiqueta: "Certificados", href: "/buscar-talento", inactivo: true },
+    { etiqueta: "Learning", href: "/learning" },
   ],
   administrador: [
     { etiqueta: "Dashboard", href: "/dashboard" },
     { etiqueta: "Buscar talento", href: "/buscar-talento" },
     { etiqueta: "Asistente", href: "/asistente" },
     { etiqueta: "Administración", href: "/administracion" },
+    { etiqueta: "Learning", href: "/learning" },
   ],
 };
 

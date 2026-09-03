@@ -1,5 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
 import { hashearContrasena } from "@/lib/auth/password";
+import { CURSOS_ACADEMY, INSCRIPCIONES } from "@/lib/learning/academy";
 
 /**
  * Contenido inicial, tomado del canvas de mockups y completado con perfiles
@@ -567,6 +568,21 @@ export function sembrar(bd: DatabaseSync): void {
     "Verificó certificado PL-300",
     "2026-08-22 09:15:00",
   );
+
+  const insCurso = bd.prepare(
+    "INSERT INTO cursos (moodle_id, titulo, descripcion, etiquetas) VALUES (?, ?, ?, ?)",
+  );
+  for (const curso of CURSOS_ACADEMY) insCurso.run(...curso);
+
+  const idCurso = bd.prepare("SELECT id FROM cursos WHERE moodle_id = ?");
+  const insInscripcion = bd.prepare(
+    "INSERT INTO inscripciones (usuario_id, curso_id, avance) VALUES (?, ?, ?)",
+  );
+  for (const [correo, moodleId, avance] of INSCRIPCIONES) {
+    const usuarioId = ids[correo];
+    const curso = idCurso.get(moodleId) as { id: number } | undefined;
+    if (usuarioId && curso) insInscripcion.run(usuarioId, curso.id, avance);
+  }
 
   bd.prepare(
     "INSERT INTO sincronizaciones (id, origen, hecha_en) VALUES (1, ?, datetime('now'))",

@@ -7,7 +7,7 @@ import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { IconArrowRight, IconCheck, IconLearning, IconTalent } from "@/components/ui/icons";
 import { sesionActual } from "@/lib/auth/sesion";
 import { accionCerrarSesion } from "@/lib/auth/acciones";
-import { completitudDe } from "@/lib/db/consultas";
+import { completitudDe, resumenLearning } from "@/lib/db/consultas";
 import { ETIQUETA_ROL, INICIO_POR_ROL } from "@/lib/data/usuarios";
 
 /** Pantalla 5.1b — Elegir módulo tras iniciar sesión. */
@@ -16,6 +16,7 @@ export default async function SeleccionarModuloPage() {
   if (!usuario) redirect("/login");
 
   const { valor: completitud, faltantes } = completitudDe(usuario.id);
+  const learning = resumenLearning(usuario.id);
 
   const destinoTalent =
     usuario.rol === "empleado" && !usuario.consentimiento
@@ -59,10 +60,8 @@ export default async function SeleccionarModuloPage() {
         </div>
 
         <div className="grid w-full max-w-[1040px] grid-cols-1 gap-6 md:grid-cols-2 lg:gap-[26px]">
-          <a
-            href="https://academy.prediqt.ec"
-            target="_blank"
-            rel="noreferrer"
+          <Link
+            href="/learning"
             className="flex flex-col rounded-card-xl border border-line bg-surface px-6 pb-7 pt-8 transition-shadow hover:border-accent hover:shadow-card-hover sm:px-8"
           >
             <span className="grid h-[52px] w-[52px] place-items-center rounded-[13px] bg-accent-soft text-accent">
@@ -75,14 +74,27 @@ export default async function SeleccionarModuloPage() {
               Cursos de Prediqt Academy, tu avance y los certificados que se reflejan en tu perfil.
             </p>
 
+            <div className="mt-5 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[13.5px] font-medium text-muted">
+                  {learning.enProgreso}{" "}
+                  {learning.enProgreso === 1 ? "curso en progreso" : "cursos en progreso"}
+                </span>
+                <span className="text-[14px] font-bold text-accent">{learning.promedio}%</span>
+              </div>
+              <ProgressBar valor={learning.promedio} tono="accent" />
+            </div>
+
             <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6">
-              <span className="text-[13px] text-faint">Catálogo de Prediqt Academy</span>
+              <span className="text-[13px] text-faint">
+                {learning.completados} completados de {learning.inscritos}
+              </span>
               <span className="inline-flex items-center gap-2 rounded-[8px] bg-accent px-[18px] py-2.5 text-[14px] font-semibold text-white">
                 Entrar a Learning
                 <IconArrowRight size={15} />
               </span>
             </div>
-          </a>
+          </Link>
 
           <Link
             href={destinoTalent}

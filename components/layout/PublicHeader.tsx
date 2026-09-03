@@ -7,7 +7,7 @@ import { MicrosoftMark } from "@/components/ui/MicrosoftMark";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 
 const enlaces = [
-  { etiqueta: "Learning", href: "/login" },
+  { etiqueta: "Learning", href: "/learning" },
   { etiqueta: "Talent", href: "/login" },
 ] as const;
 

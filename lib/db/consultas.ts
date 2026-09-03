@@ -595,6 +595,52 @@ export function metricasTablero(filtro: FiltroTablero = {}): MetricasTablero {
 }
 
 /* ------------------------------------------------------------------ */
+/* Prediqt Learning (Moodle en academy.prediqt.ec)                     */
+/* ------------------------------------------------------------------ */
+
+export interface CursoFila {
+  id: number;
+  moodle_id: number;
+  titulo: string;
+  descripcion: string;
+  etiquetas: string;
+  /** null cuando la persona no está inscrita. */
+  avance: number | null;
+}
+
+export function cursosDe(usuarioId: number): CursoFila[] {
+  return consultar<CursoFila>(
+    `SELECT c.id, c.moodle_id, c.titulo, c.descripcion, c.etiquetas, i.avance
+     FROM cursos c
+     LEFT JOIN inscripciones i ON i.curso_id = c.id AND i.usuario_id = ?
+     ORDER BY (i.avance IS NULL), i.avance DESC, c.titulo`,
+    usuarioId,
+  );
+}
+
+export interface ResumenLearning {
+  readonly inscritos: number;
+  readonly enProgreso: number;
+  readonly completados: number;
+  readonly promedio: number;
+}
+
+export function resumenLearning(usuarioId: number): ResumenLearning {
+  const filas = consultar<{ avance: number }>(
+    "SELECT avance FROM inscripciones WHERE usuario_id = ?",
+    usuarioId,
+  );
+  const enProgreso = filas.filter((f) => f.avance > 0 && f.avance < 100).length;
+  const completados = filas.filter((f) => f.avance >= 100).length;
+  const promedio =
+    filas.length === 0
+      ? 0
+      : Math.round(filas.reduce((a, f) => a + f.avance, 0) / filas.length);
+
+  return { inscritos: filas.length, enProgreso, completados, promedio };
+}
+
+/* ------------------------------------------------------------------ */
 /* Configuracion y sincronizacion                                      */
 /* ------------------------------------------------------------------ */
 
