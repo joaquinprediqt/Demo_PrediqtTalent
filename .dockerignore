@@ -1,0 +1,38 @@
+# Dependencias: se reinstalan dentro de la imagen con npm ci.
+node_modules
+npm-debug.log*
+
+# Artefactos de compilacion del host: la imagen construye los suyos.
+.next
+out
+build
+*.tsbuildinfo
+next-env.d.ts
+
+# Control de versiones y editor
+.git
+.gitignore
+.github
+.vscode
+.idea
+
+# Secretos: nunca deben quedar horneados en una capa de la imagen.
+.env
+.env.*
+!.env.example
+
+# Base de datos local de la demo: dentro del contenedor se siembra sola.
+data
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+docker-compose.*.yml
+
+# Documentacion y basura del sistema
+README.md
+.DS_Store
+Thumbs.db
+*.log
+.vercel
