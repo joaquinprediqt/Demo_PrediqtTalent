@@ -443,6 +443,158 @@ export function listarAuditoria(limite = 50): AuditoriaFila[] {
 }
 
 /* ------------------------------------------------------------------ */
+/* Metricas del tablero (5.7)                                          */
+/* ------------------------------------------------------------------ */
+
+export interface FiltroTablero {
+  readonly sede?: string;
+  readonly area?: string;
+}
+
+export interface MetricasTablero {
+  /** Con filtro activo se muestran solo las filas reales, sin la base. */
+  readonly filtrado: boolean;
+  readonly colaboradores: number;
+  readonly sincronizados: number;
+  readonly perfilesCompletosPct: number;
+  readonly variacionPct: number;
+  readonly certificacionesVerificadas: number;
+  readonly certificacionesPendientes: number;
+  readonly consultasAsistente: number;
+  readonly habilidades: readonly { nombre: string; personas: number }[];
+  readonly sedes: readonly { sede: string; personas: number; porcentaje: number }[];
+  readonly proveedores: readonly { proveedor: string; total: number }[];
+}
+
+/** Baseline de la organizacion para las certificaciones por proveedor. */
+const PROVEEDORES_BASE: readonly [string, number][] = [
+  ["Microsoft", 30],
+  ["Qlik", 19],
+  ["Google Cloud", 9],
+  ["Prediqt Academy", 4],
+];
+
+export function metricasTablero(filtro: FiltroTablero = {}): MetricasTablero {
+  const sede = filtro.sede && filtro.sede !== "todas" ? filtro.sede : null;
+  const area = filtro.area && filtro.area !== "todas" ? filtro.area : null;
+  const filtrado = sede !== null || area !== null;
+
+  const condiciones = ["u.activo = 1"];
+  const parametros: unknown[] = [];
+  if (sede) {
+    condiciones.push("u.sede = ?");
+    parametros.push(sede);
+  }
+  if (area) {
+    condiciones.push("u.area = ?");
+    parametros.push(area);
+  }
+  const donde = condiciones.join(" AND ");
+
+  const usuarios = consultar<{ id: number; sede: string }>(
+    `SELECT u.id, u.sede FROM usuarios u WHERE ${donde}`,
+    ...parametros,
+  );
+
+  const completitudes = usuarios.map((u) => completitudDe(u.id).valor);
+  const promedio =
+    completitudes.length === 0
+      ? 0
+      : Math.round(completitudes.reduce((a, b) => a + b, 0) / completitudes.length);
+
+  const previo = Number(configuracion("perfiles_completos_pct_previo", "0"));
+
+  // Habilidades: recuento real y, sin filtro, mas la base de la organizacion.
+  const catalogo = catalogoHabilidades();
+  const reales = consultar<{ nombre: string; personas: number }>(
+    `SELECT h.nombre, COUNT(*) AS personas
+     FROM usuario_habilidades uh
+     JOIN habilidades h ON h.id = uh.habilidad_id
+     JOIN usuarios u ON u.id = uh.usuario_id
+     WHERE ${donde}
+     GROUP BY h.id`,
+    ...parametros,
+  );
+
+  const habilidades = (filtrado
+    ? reales.map((r) => ({ nombre: r.nombre, personas: r.personas }))
+    : catalogo.map((h) => ({ nombre: h.nombre, personas: h.personas }))
+  )
+    .filter((h) => h.personas > 0)
+    .sort((a, b) => b.personas - a.personas)
+    .slice(0, 7);
+
+  // Distribucion por sede.
+  const sedes = consultar<{ nombre: string; base: number }>(
+    "SELECT nombre, base FROM sedes ORDER BY orden",
+  )
+    .map((s) => {
+      const activosAqui = usuarios.filter((u) => u.sede === s.nombre).length;
+      return { sede: s.nombre, personas: filtrado ? activosAqui : s.base + activosAqui };
+    })
+    .filter((s) => s.personas > 0);
+  const totalSedes = sedes.reduce((a, s) => a + s.personas, 0);
+  const sedesConPorcentaje = sedes.map((s) => ({
+    ...s,
+    porcentaje: totalSedes === 0 ? 0 : Math.round((s.personas / totalSedes) * 100),
+  }));
+
+  // Certificaciones verificadas.
+  const verificadasReales =
+    consultarUno<{ total: number }>(
+      `SELECT COUNT(*) AS total FROM certificaciones c
+       JOIN usuarios u ON u.id = c.usuario_id
+       WHERE c.insignia = 'verificada' AND ${donde}`,
+      ...parametros,
+    )?.total ?? 0;
+  const verificadas =
+    verificadasReales +
+    (filtrado ? 0 : Number(configuracion("certificaciones_verificadas_base", "0")));
+
+  // Proveedores: el emisor viene como "Microsoft · 2023".
+  const emisores = consultar<{ emisor: string; total: number }>(
+    `SELECT c.emisor, COUNT(*) AS total FROM certificaciones c
+     JOIN usuarios u ON u.id = c.usuario_id
+     WHERE ${donde}
+     GROUP BY c.emisor`,
+    ...parametros,
+  );
+  const conteoProveedor = new Map<string, number>();
+  for (const fila of emisores) {
+    const nombre = (fila.emisor.split("·")[0] ?? fila.emisor).trim() || "Sin emisor";
+    conteoProveedor.set(nombre, (conteoProveedor.get(nombre) ?? 0) + fila.total);
+  }
+  if (!filtrado) {
+    for (const [nombre, base] of PROVEEDORES_BASE) {
+      conteoProveedor.set(nombre, (conteoProveedor.get(nombre) ?? 0) + base);
+    }
+  }
+  const proveedores = [...conteoProveedor.entries()]
+    .map(([proveedor, total]) => ({ proveedor, total }))
+    .filter((p) => p.total > 0)
+    .sort((a, b) => b.total - a.total);
+
+  const consultasAsistente =
+    consultarUno<{ total: number }>(
+      "SELECT COUNT(*) AS total FROM auditoria WHERE perfil = 'Consulta al Asistente'",
+    )?.total ?? 0;
+
+  return {
+    filtrado,
+    colaboradores: usuarios.length,
+    sincronizados: Number(configuracion("usuarios_sincronizados", "0")),
+    perfilesCompletosPct: promedio,
+    variacionPct: promedio - previo,
+    certificacionesVerificadas: verificadas,
+    certificacionesPendientes: Number(configuracion("certificaciones_pendientes", "0")),
+    consultasAsistente,
+    habilidades,
+    sedes: sedesConPorcentaje,
+    proveedores,
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* Configuracion y sincronizacion                                      */
 /* ------------------------------------------------------------------ */
 
