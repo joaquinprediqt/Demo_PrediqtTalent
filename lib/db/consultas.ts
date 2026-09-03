@@ -187,6 +187,104 @@ export function documentosDe(usuarioId: number): DocumentoFila[] {
   );
 }
 
+/* --- Escrituras del perfil (pantalla 5.3) --- */
+
+export function agregarEducacion(
+  usuarioId: number,
+  institucion: string,
+  programa: string,
+  detalle: string,
+  periodo: string,
+): number {
+  return ejecutar(
+    "INSERT INTO educacion (usuario_id, institucion, programa, detalle, periodo) VALUES (?, ?, ?, ?, ?)",
+    usuarioId,
+    institucion,
+    programa,
+    detalle,
+    periodo,
+  );
+}
+
+export function agregarExperiencia(
+  usuarioId: number,
+  titulo: string,
+  periodo: string,
+  detalle: string,
+  etiquetas: string,
+  actual: boolean,
+): number {
+  return ejecutar(
+    "INSERT INTO experiencia (usuario_id, titulo, periodo, detalle, etiquetas, actual) VALUES (?, ?, ?, ?, ?, ?)",
+    usuarioId,
+    titulo,
+    periodo,
+    detalle,
+    etiquetas,
+    actual ? 1 : 0,
+  );
+}
+
+export function agregarCertificacion(
+  usuarioId: number,
+  titulo: string,
+  emisor: string,
+  detalle: string,
+  insignia: "verificada" | "learning",
+): number {
+  return ejecutar(
+    "INSERT INTO certificaciones (usuario_id, titulo, emisor, detalle, insignia) VALUES (?, ?, ?, ?, ?)",
+    usuarioId,
+    titulo,
+    emisor,
+    detalle,
+    insignia,
+  );
+}
+
+export function agregarDocumento(
+  usuarioId: number,
+  nombre: string,
+  detalle: string,
+  insignia: string,
+): number {
+  return ejecutar(
+    "INSERT INTO documentos (usuario_id, nombre, detalle, insignia) VALUES (?, ?, ?, ?)",
+    usuarioId,
+    nombre,
+    detalle,
+    insignia,
+  );
+}
+
+export function borrarDocumento(usuarioId: number, documentoId: number): void {
+  ejecutar("DELETE FROM documentos WHERE id = ? AND usuario_id = ?", documentoId, usuarioId);
+}
+
+export function asignarHabilidad(usuarioId: number, habilidadId: number): void {
+  ejecutar(
+    "INSERT OR IGNORE INTO usuario_habilidades (usuario_id, habilidad_id) VALUES (?, ?)",
+    usuarioId,
+    habilidadId,
+  );
+}
+
+export function quitarHabilidad(usuarioId: number, habilidadId: number): void {
+  ejecutar(
+    "DELETE FROM usuario_habilidades WHERE usuario_id = ? AND habilidad_id = ?",
+    usuarioId,
+    habilidadId,
+  );
+}
+
+export function actualizarFoto(usuarioId: number, fotoUrl: string | null): void {
+  ejecutar("UPDATE usuarios SET foto_url = ? WHERE id = ?", fotoUrl, usuarioId);
+}
+
+export function actualizarResumen(usuarioId: number, resumen: string): void {
+  ejecutar("UPDATE usuarios SET resumen = ? WHERE id = ?", resumen.trim(), usuarioId);
+}
+
 /**
  * Completitud derivada de lo que hay en la base, no un numero fijo.
  * Los pesos suman 100.

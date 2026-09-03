@@ -1,5 +1,11 @@
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { AgregarEntrada, type Campo } from "@/components/perfil/AgregarEntrada";
+import {
+  accionAgregarCertificacion,
+  accionAgregarEducacion,
+  accionAgregarExperiencia,
+} from "@/app/(app)/perfil/acciones";
 import type {
   CertificacionFila,
   EducacionFila,
@@ -11,18 +17,67 @@ interface Props {
   educacion: readonly EducacionFila[];
   experiencia: readonly ExperienciaFila[];
   certificaciones: readonly CertificacionFila[];
+  /** Solo el dueño del perfil ve los formularios de alta. */
+  editable: boolean;
 }
+
+const CAMPOS_EDUCACION: readonly Campo[] = [
+  { nombre: "institucion", etiqueta: "Institución", requerido: true },
+  { nombre: "programa", etiqueta: "Programa", requerido: true },
+  { nombre: "periodo", etiqueta: "Periodo", ayuda: "marzo 2021 – julio 2022" },
+  { nombre: "detalle", etiqueta: "Detalle", tipo: "area" },
+];
+
+const CAMPOS_EXPERIENCIA: readonly Campo[] = [
+  { nombre: "titulo", etiqueta: "Puesto o proyecto", requerido: true },
+  { nombre: "periodo", etiqueta: "Periodo", ayuda: "enero 2021 – actualidad" },
+  { nombre: "etiquetas", etiqueta: "Tecnologías", ayuda: "Power BI, SQL, DAX" },
+  { nombre: "actual", etiqueta: "Es mi puesto actual", tipo: "checkbox" },
+  { nombre: "detalle", etiqueta: "Detalle", tipo: "area" },
+];
+
+const CAMPOS_CERTIFICACION: readonly Campo[] = [
+  { nombre: "titulo", etiqueta: "Título", requerido: true },
+  { nombre: "emisor", etiqueta: "Emisor", ayuda: "Microsoft · 2023" },
+  {
+    nombre: "insignia",
+    etiqueta: "Origen",
+    tipo: "select",
+    opciones: [
+      { valor: "verificada", etiqueta: "Verificada" },
+      { valor: "learning", etiqueta: "Prediqt Learning" },
+    ],
+  },
+  { nombre: "detalle", etiqueta: "Detalle", tipo: "area" },
+];
 
 function Vacio({ texto }: { texto: string }) {
   return <p className="mt-3 text-[13.5px] text-faint">{texto}</p>;
 }
 
 /** Columna derecha de la pantalla 5.3: educación, experiencia y certificaciones. */
-export function ProfileMain({ educacion, experiencia, certificaciones }: Props) {
+export function ProfileMain({
+  educacion,
+  experiencia,
+  certificaciones,
+  editable,
+}: Props) {
   return (
     <div className="flex flex-col gap-4">
       <Card padding="lg">
-        <CardHeader titulo="Educación" />
+        <CardHeader
+          titulo="Educación"
+          accion={
+            editable ? (
+              <AgregarEntrada
+                etiqueta="Agregar entrada"
+                titulo="Nueva entrada de educación"
+                accion={accionAgregarEducacion}
+                campos={CAMPOS_EDUCACION}
+              />
+            ) : undefined
+          }
+        />
         {educacion.length === 0 ? (
           <Vacio texto="Sin entradas de educación todavía." />
         ) : (
@@ -47,7 +102,19 @@ export function ProfileMain({ educacion, experiencia, certificaciones }: Props) 
       </Card>
 
       <Card padding="lg">
-        <CardHeader titulo="Experiencia y proyectos" />
+        <CardHeader
+          titulo="Experiencia y proyectos"
+          accion={
+            editable ? (
+              <AgregarEntrada
+                etiqueta="Agregar entrada"
+                titulo="Nueva experiencia o proyecto"
+                accion={accionAgregarExperiencia}
+                campos={CAMPOS_EXPERIENCIA}
+              />
+            ) : undefined
+          }
+        />
         {experiencia.length === 0 ? (
           <Vacio texto="Sin experiencia registrada todavía." />
         ) : (
@@ -105,7 +172,19 @@ export function ProfileMain({ educacion, experiencia, certificaciones }: Props) 
       </Card>
 
       <Card padding="lg" className="flex-1">
-        <CardHeader titulo="Certificaciones y formación complementaria" />
+        <CardHeader
+          titulo="Certificaciones y formación complementaria"
+          accion={
+            editable ? (
+              <AgregarEntrada
+                etiqueta="Agregar entrada"
+                titulo="Nueva certificación"
+                accion={accionAgregarCertificacion}
+                campos={CAMPOS_CERTIFICACION}
+              />
+            ) : undefined
+          }
+        />
         {certificaciones.length === 0 ? (
           <Vacio texto="Sin certificaciones registradas todavía." />
         ) : (

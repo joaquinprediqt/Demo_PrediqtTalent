@@ -37,16 +37,29 @@ export function db(): DatabaseSync {
   return globalThis.__prediqtBd;
 }
 
+/**
+ * node:sqlite devuelve filas con prototipo nulo. React Server Components se
+ * niega a serializar esos objetos hacia un componente de cliente, así que
+ * aquí se copian a objetos planos una sola vez, en la frontera de datos.
+ */
+function plano<T>(fila: unknown): T {
+  return { ...(fila as Record<string, unknown>) } as T;
+}
+
 /** Ejecuta una consulta de lectura y devuelve las filas ya tipadas. */
 export function consultar<T>(sql: string, ...parametros: unknown[]): T[] {
-  const sentencia = db().prepare(sql);
-  return sentencia.all(...(parametros as never[])) as T[];
+  const filas = db()
+    .prepare(sql)
+    .all(...(parametros as never[]));
+  return filas.map((fila) => plano<T>(fila));
 }
 
 /** Ejecuta una consulta de lectura que devuelve como mucho una fila. */
 export function consultarUno<T>(sql: string, ...parametros: unknown[]): T | null {
-  const fila = db().prepare(sql).get(...(parametros as never[]));
-  return (fila as T | undefined) ?? null;
+  const fila = db()
+    .prepare(sql)
+    .get(...(parametros as never[]));
+  return fila === undefined ? null : plano<T>(fila);
 }
 
 /** Ejecuta una escritura y devuelve el identificador insertado. */

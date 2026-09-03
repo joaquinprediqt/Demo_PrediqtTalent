@@ -10,6 +10,7 @@ import {
   educacionDe,
   experienciaDe,
   habilidadesDe,
+  catalogoHabilidades,
   registrarAuditoria,
   usuarioPorCorreo,
   usuarioPorId,
@@ -73,11 +74,14 @@ export default async function PerfilPage({
           documentos={documentos}
           completitud={completitud}
           faltantes={faltantes}
+          catalogo={catalogoHabilidades()}
+          editable={esPropio}
         />
         <ProfileMain
           educacion={educacion}
           experiencia={experiencia}
           certificaciones={certificaciones}
+          editable={esPropio}
         />
       </div>
     </div>
