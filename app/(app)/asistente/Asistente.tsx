@@ -8,6 +8,7 @@ import { REQUERIMIENTO_EJEMPLO, SUGERENCIAS } from "@/lib/data/candidatos";
 import type { ResultadoAsistente } from "@/lib/asistente/motor";
 import { accionConsultarAsistente } from "./acciones";
 import { Chip } from "@/components/ui/Chip";
+import { TablaComparacion } from "@/components/asistente/TablaComparacion";
 
 interface Props {
   usuario: { rol: string; correo: string; etiquetaRol: string };
@@ -17,11 +18,19 @@ interface Props {
 export function Asistente({ usuario, inicial }: Props) {
   const [borrador, setBorrador] = useState(REQUERIMIENTO_EJEMPLO);
   const [resultado, setResultado] = useState<ResultadoAsistente>(inicial);
+  const [comparados, setComparados] = useState<number[]>([]);
   const [pendiente, iniciar] = useTransition();
+
+  function alternarComparacion(id: number) {
+    setComparados((previos) =>
+      previos.includes(id) ? previos.filter((x) => x !== id) : [...previos, id],
+    );
+  }
 
   function consultar(texto: string) {
     iniciar(async () => {
       setResultado(await accionConsultarAsistente(texto));
+      setComparados([]);
     });
   }
 
@@ -115,10 +124,21 @@ export function Asistente({ usuario, inicial }: Props) {
           {resultado.coincidencias.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {resultado.coincidencias.map((coincidencia) => (
-                <MatchCard key={coincidencia.id} coincidencia={coincidencia} />
+                <MatchCard
+                  key={coincidencia.id}
+                  coincidencia={coincidencia}
+                  seleccionado={comparados.includes(coincidencia.id)}
+                  onComparar={alternarComparacion}
+                />
               ))}
             </div>
           )}
+
+          <TablaComparacion
+            seleccionados={resultado.coincidencias.filter((c) => comparados.includes(c.id))}
+            pedidas={resultado.pedidas}
+            onLimpiar={() => setComparados([])}
+          />
         </>
       )}
 
