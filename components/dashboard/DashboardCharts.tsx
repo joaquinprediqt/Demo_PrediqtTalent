@@ -56,25 +56,28 @@ export function SkillsBarChart({
       {habilidades.length === 0 ? (
         <SinDatos texto="Ningún perfil declara habilidades con este filtro." />
       ) : (
-        <div className="mt-3 flex h-[170px] items-end gap-2 sm:gap-4">
-          {habilidades.map((habilidad, indice) => (
-            <div
-              key={habilidad.nombre}
-              className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
-            >
-              <span className="text-[12px] font-semibold text-ink">{habilidad.personas}</span>
+        /* Con siete barras y móviles de 320 px, se desliza en vez de aplastarse. */
+        <div className="mt-3 overflow-x-auto">
+          <div className="flex h-[170px] min-w-[340px] items-end gap-2 sm:min-w-0 sm:gap-4">
+            {habilidades.map((habilidad, indice) => (
               <div
-                className="w-full rounded-t-[4px]"
-                style={{
-                  backgroundColor: colorPorIndice(PALETA_BARRAS, indice),
-                  height: `${(habilidad.personas / maximo) * 100}%`,
-                }}
-              />
-              <span className="text-center text-[11px] leading-tight text-muted sm:text-[11.5px]">
-                {habilidad.nombre}
-              </span>
-            </div>
-          ))}
+                key={habilidad.nombre}
+                className="flex h-full flex-1 flex-col items-center justify-end gap-1.5"
+              >
+                <span className="text-[12px] font-semibold text-ink">{habilidad.personas}</span>
+                <div
+                  className="w-full rounded-t-[4px]"
+                  style={{
+                    backgroundColor: colorPorIndice(PALETA_BARRAS, indice),
+                    height: `${(habilidad.personas / maximo) * 100}%`,
+                  }}
+                />
+                <span className="text-center text-[11px] leading-tight text-muted sm:text-[11.5px]">
+                  {habilidad.nombre}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -115,7 +118,7 @@ export function SiteDonut({ sedes }: { sedes: MetricasTablero["sedes"] }) {
             })}
           </svg>
 
-          <ul className="flex min-w-[180px] flex-1 flex-col gap-2.5">
+          <ul className="flex min-w-[160px] flex-1 flex-col gap-2.5">
             {sedes.map((porcion, indice) => (
               <li key={porcion.sede} className="flex items-center gap-2.5">
                 <span

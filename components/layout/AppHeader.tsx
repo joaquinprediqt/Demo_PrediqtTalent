@@ -39,10 +39,11 @@ export function AppHeader() {
   return (
     <header className="shrink-0 bg-grad-header dark:border-b dark:border-[#1E3550] dark:bg-grad-header-dark">
       <div className="mx-auto flex min-h-[60px] max-w-screenframe flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-5 lg:px-7 lg:py-0">
-        <div className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-2 lg:flex-none lg:gap-[30px]">
+        <div className="flex w-full min-w-0 items-center gap-4 lg:w-auto lg:flex-none lg:gap-[30px]">
           <Logo variante="app" href={enlaces[0]?.href ?? "/"} />
 
-          <nav className="flex flex-wrap items-center gap-0.5">
+          {/* En móvil la navegación se desliza en vez de apilarse y estirar el header. */}
+          <nav className="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-none lg:overflow-visible">
             {enlaces.map((enlace) => {
               const Icono = ICONOS[enlace.etiqueta] ?? IconGrid;
               const activo = pathname === enlace.href && !enlace.inactivo;
@@ -52,7 +53,7 @@ export function AppHeader() {
                   href={enlace.href}
                   aria-current={activo ? "page" : undefined}
                   className={cn(
-                    "flex items-center gap-[7px] rounded-[7px] px-2.5 py-[7px] text-[13.5px] transition-colors sm:px-3 sm:text-[14px]",
+                    "flex shrink-0 items-center gap-[7px] whitespace-nowrap rounded-[7px] px-2.5 py-[7px] text-[13.5px] transition-colors sm:px-3 sm:text-[14px]",
                     activo
                       ? "bg-white/[0.13] font-semibold text-white"
                       : "font-medium text-white/[0.68] hover:text-white",
@@ -66,7 +67,7 @@ export function AppHeader() {
           </nav>
         </div>
 
-        <div className="flex items-center gap-3 lg:gap-[14px]">
+        <div className="flex w-full items-center justify-end gap-3 lg:w-auto lg:gap-[14px]">
           <ThemeToggle />
 
           <span className="hidden rounded-[5px] border border-accent-light/40 px-2 py-1 text-[11.5px] font-semibold tracking-[0.1em] text-accent-light xl:block">

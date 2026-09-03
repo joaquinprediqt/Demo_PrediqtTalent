@@ -34,7 +34,7 @@ export function FormAsignarRol({
         action={enviar}
         className="mt-2 flex flex-wrap items-end gap-2 rounded-[10px] border border-line-soft bg-surface-raised p-3"
       >
-        <label className="flex min-w-[200px] flex-1 flex-col gap-1">
+        <label className="flex min-w-[150px] flex-1 flex-col gap-1">
           <span className="text-[12px] font-medium text-muted">Cuenta</span>
           <select name="usuarioId" className={campo}>
             {usuarios.map((u) => (
@@ -45,7 +45,7 @@ export function FormAsignarRol({
           </select>
         </label>
 
-        <label className="flex min-w-[150px] flex-col gap-1">
+        <label className="flex min-w-[120px] flex-1 flex-col gap-1">
           <span className="text-[12px] font-medium text-muted">Nuevo rol</span>
           <select name="rol" className={campo}>
             {ROLES.map((r) => (
@@ -89,11 +89,11 @@ export function FormNuevaHabilidad() {
         className="mt-2.5 rounded-[10px] border border-line-soft bg-surface-raised p-3"
       >
         <div className="flex flex-wrap gap-2">
-          <label className="flex min-w-[140px] flex-1 flex-col gap-1">
+          <label className="flex min-w-[120px] flex-1 flex-col gap-1">
             <span className="text-[12px] font-medium text-muted">Nombre</span>
             <input name="nombre" type="text" required placeholder="dbt" className={campo} />
           </label>
-          <label className="flex min-w-[140px] flex-1 flex-col gap-1">
+          <label className="flex min-w-[120px] flex-1 flex-col gap-1">
             <span className="text-[12px] font-medium text-muted">Categoría</span>
             <input
               name="categoria"
