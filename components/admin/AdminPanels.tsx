@@ -1,38 +1,43 @@
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { IconCheckCircle, IconUpload } from "@/components/ui/icons";
-import {
-  AUDITORIA,
-  CATALOGO_HABILIDADES,
-  TOTAL_USUARIOS,
-  ULTIMA_CARGA,
-  USUARIOS_TABLA,
-} from "@/lib/data/administracion";
+import { FormAsignarRol, FormNuevaHabilidad } from "@/components/admin/FormulariosAdmin";
+import { ULTIMA_CARGA } from "@/lib/data/administracion";
 import { ETIQUETA_ROL } from "@/lib/data/usuarios";
+import type { AuditoriaFila, CatalogoFila, UsuarioFila } from "@/lib/db/consultas";
 
 const columnasUsuarios = "1.5fr 1.4fr 1fr 0.9fr 0.7fr";
 
-export function PanelUsuarios() {
+function BotonExportar({ recurso, etiqueta }: { recurso: string; etiqueta: string }) {
+  return (
+    <a
+      href={`/api/exportar/${recurso}`}
+      className="rounded-[8px] border border-line-input px-[13px] py-2 text-[13px] font-semibold text-muted transition-colors hover:border-accent hover:text-accent"
+    >
+      {etiqueta}
+    </a>
+  );
+}
+
+export function PanelUsuarios({
+  usuarios,
+  sincronizados,
+}: {
+  usuarios: readonly UsuarioFila[];
+  sincronizados: number;
+}) {
   return (
     <Card padding="none" className="overflow-hidden">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+      <div className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
         <CardHeader
           titulo="Gestión de usuarios y roles"
-          descripcion={`Cuentas sincronizadas desde Microsoft Entra ID · ${TOTAL_USUARIOS} usuarios`}
+          descripcion={`Cuentas sincronizadas desde Microsoft Entra ID · ${sincronizados} usuarios`}
         />
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="rounded-[8px] border border-line-input px-[13px] py-2 text-[13px] font-semibold text-muted"
-          >
-            Exportar
-          </button>
-          <button
-            type="button"
-            className="rounded-[8px] bg-navy px-[13px] py-2 text-[13px] font-semibold text-white"
-          >
-            Asignar rol
-          </button>
+        <div className="flex flex-wrap items-start gap-2">
+          <BotonExportar recurso="usuarios" etiqueta="Exportar" />
+          <FormAsignarRol
+            usuarios={usuarios.map((u) => ({ id: u.id, nombre: u.nombre, rol: u.rol }))}
+          />
         </div>
       </div>
 
@@ -48,18 +53,18 @@ export function PanelUsuarios() {
             <span>SEDE</span>
             <span>ESTADO</span>
           </div>
-          {USUARIOS_TABLA.map((fila) => (
+          {usuarios.map((fila) => (
             <div
-              key={fila.cuenta}
+              key={fila.id}
               className="grid items-center border-b border-line-soft px-5 py-[13px] text-[14px] text-ink-2 last:border-b-0"
               style={{ gridTemplateColumns: columnasUsuarios }}
             >
               <span className="font-semibold text-ink">{fila.nombre}</span>
-              <span>{fila.cuenta}</span>
+              <span>{fila.correo}</span>
               <span>{ETIQUETA_ROL[fila.rol]}</span>
               <span>{fila.sede}</span>
-              <Badge tono={fila.estado === "activo" ? "activo" : "neutro"}>
-                {fila.estado === "activo" ? "Activo" : "Sin perfil"}
+              <Badge tono={fila.activo === 1 ? "activo" : "neutro"}>
+                {fila.activo === 1 ? "Activo" : "Sin perfil"}
               </Badge>
             </div>
           ))}
@@ -69,8 +74,9 @@ export function PanelUsuarios() {
   );
 }
 
-export function PanelAuditoria() {
+export function PanelAuditoria({ filas }: { filas: readonly AuditoriaFila[] }) {
   const columnas = "1.1fr 1.2fr 1fr 0.8fr";
+
   return (
     <Card padding="sm" className="flex-1">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -78,7 +84,7 @@ export function PanelAuditoria() {
           titulo="Auditoría de accesos"
           descripcion="Qué perfil consultó cada Reclutador o Administrador, y cuándo"
         />
-        <span className="text-[13px] font-medium text-steel">Últimos 7 días · exportar CSV</span>
+        <BotonExportar recurso="auditoria" etiqueta="Exportar CSV" />
       </div>
 
       <div className="mt-3 overflow-x-auto">
@@ -92,48 +98,52 @@ export function PanelAuditoria() {
             <span>ACCIÓN</span>
             <span>FECHA Y HORA</span>
           </div>
-          {AUDITORIA.map((fila) => (
+          {filas.map((fila) => (
             <div
-              key={`${fila.quien}-${fila.cuando}`}
+              key={fila.id}
               className="grid border-b border-line-soft py-[11px] text-[13.5px] text-ink-2 last:border-b-0"
               style={{ gridTemplateColumns: columnas }}
             >
-              <span>{fila.quien}</span>
+              <span>{fila.actor}</span>
               <span>{fila.perfil}</span>
               <span>{fila.accion}</span>
-              <span>{fila.cuando}</span>
+              <span>{fila.creado_en}</span>
             </div>
           ))}
+          {filas.length === 0 && (
+            <p className="py-4 text-[13.5px] text-faint">Sin consultas registradas todavía.</p>
+          )}
         </div>
       </div>
     </Card>
   );
 }
 
-export function PanelCatalogo() {
+export function PanelCatalogo({ catalogo }: { catalogo: readonly CatalogoFila[] }) {
   return (
     <Card padding="sm" className="flex-1">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <h2 className="text-[17px] font-bold text-ink">Catálogo de habilidades</h2>
-        <button type="button" className="text-[12.5px] font-semibold text-accent">
-          + Nueva habilidad
-        </button>
+        <div className="flex flex-wrap items-start gap-3">
+          <BotonExportar recurso="catalogo" etiqueta="Exportar" />
+          <FormNuevaHabilidad />
+        </div>
       </div>
       <p className="mt-1 text-[13px] leading-[1.5] text-faint">
         Lista controlada: el Empleado elige de aquí, no escribe texto libre.
       </p>
 
       <div className="mt-3.5 overflow-hidden rounded-[9px] border border-line-soft">
-        {CATALOGO_HABILIDADES.map((habilidad) => (
+        {catalogo.map((habilidad) => (
           <div
-            key={habilidad.nombre}
+            key={habilidad.id}
             className="flex items-center justify-between gap-3 border-b border-line-soft px-3 py-2.5 last:border-b-0"
           >
             <span className="min-w-0">
               <span className="text-[14px] font-semibold text-ink">{habilidad.nombre}</span>
               <span className="ml-2 text-[12.5px] text-faint">{habilidad.categoria}</span>
             </span>
-            {habilidad.pendiente ? (
+            {habilidad.estado === "pendiente" ? (
               <Badge tono="pendiente">pendiente de aprobar</Badge>
             ) : (
               <span className="shrink-0 text-[12.5px] font-medium text-steel">
@@ -172,6 +182,10 @@ export function PanelCargaMasiva() {
           {ULTIMA_CARGA.detalle}
         </span>
       </div>
+
+      <p className="mt-2 text-[12px] text-faint">
+        Pendiente por decisión tuya: esta sección queda tal cual hasta definir el formato.
+      </p>
     </Card>
   );
 }
