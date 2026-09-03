@@ -1,0 +1,365 @@
+import { consultar, consultarUno, ejecutar } from "./cliente";
+import type { Rol } from "@/types";
+
+/* ------------------------------------------------------------------ */
+/* Tipos de fila                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface UsuarioFila {
+  id: number;
+  nombre: string;
+  nombre_corto: string;
+  cargo: string;
+  correo: string;
+  iniciales: string;
+  sede: string;
+  area: string;
+  rol: Rol;
+  resumen: string;
+  disponibilidad: string;
+  ingreso: string;
+  foto_url: string | null;
+  activo: number;
+  consentimiento_en: string | null;
+}
+
+const CAMPOS_USUARIO = `
+  id, nombre, nombre_corto, cargo, correo, iniciales, sede, area, rol,
+  resumen, disponibilidad, ingreso, foto_url, activo, consentimiento_en
+`;
+
+/* ------------------------------------------------------------------ */
+/* Usuarios y credenciales                                             */
+/* ------------------------------------------------------------------ */
+
+export function usuarioPorCorreo(correo: string): UsuarioFila | null {
+  return consultarUno<UsuarioFila>(
+    `SELECT ${CAMPOS_USUARIO} FROM usuarios WHERE lower(correo) = lower(?)`,
+    correo.trim(),
+  );
+}
+
+export function credencialesPorCorreo(
+  correo: string,
+): { id: number; sal: string; hash: string; activo: number } | null {
+  return consultarUno(
+    "SELECT id, sal, hash, activo FROM usuarios WHERE lower(correo) = lower(?)",
+    correo.trim(),
+  );
+}
+
+export function usuarioPorId(id: number): UsuarioFila | null {
+  return consultarUno<UsuarioFila>(
+    `SELECT ${CAMPOS_USUARIO} FROM usuarios WHERE id = ?`,
+    id,
+  );
+}
+
+export function marcarConsentimiento(usuarioId: number): void {
+  ejecutar(
+    "UPDATE usuarios SET consentimiento_en = datetime('now') WHERE id = ? AND consentimiento_en IS NULL",
+    usuarioId,
+  );
+}
+
+export function cambiarRol(usuarioId: number, rol: Rol): void {
+  ejecutar("UPDATE usuarios SET rol = ? WHERE id = ?", rol, usuarioId);
+}
+
+export function listarUsuarios(): UsuarioFila[] {
+  return consultar<UsuarioFila>(
+    `SELECT ${CAMPOS_USUARIO} FROM usuarios ORDER BY id`,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Sesiones                                                            */
+/* ------------------------------------------------------------------ */
+
+export function crearSesion(id: string, usuarioId: number, expiraEn: string): void {
+  ejecutar(
+    "INSERT INTO sesiones (id, usuario_id, expira_en) VALUES (?, ?, ?)",
+    id,
+    usuarioId,
+    expiraEn,
+  );
+}
+
+export function usuarioDeSesion(id: string): UsuarioFila | null {
+  return consultarUno<UsuarioFila>(
+    `SELECT u.id, u.nombre, u.nombre_corto, u.cargo, u.correo, u.iniciales,
+            u.sede, u.area, u.rol, u.resumen, u.disponibilidad, u.ingreso,
+            u.foto_url, u.activo, u.consentimiento_en
+     FROM sesiones s
+     JOIN usuarios u ON u.id = s.usuario_id
+     WHERE s.id = ? AND s.expira_en > datetime('now')`,
+    id,
+  );
+}
+
+export function borrarSesion(id: string): void {
+  ejecutar("DELETE FROM sesiones WHERE id = ?", id);
+}
+
+export function limpiarSesionesVencidas(): void {
+  ejecutar("DELETE FROM sesiones WHERE expira_en <= datetime('now')");
+}
+
+/* ------------------------------------------------------------------ */
+/* Perfil                                                              */
+/* ------------------------------------------------------------------ */
+
+export interface HabilidadFila {
+  id: number;
+  nombre: string;
+  categoria: string;
+  estado: "aprobada" | "pendiente";
+}
+
+export interface EducacionFila {
+  id: number;
+  institucion: string;
+  programa: string;
+  detalle: string;
+  periodo: string;
+}
+
+export interface ExperienciaFila {
+  id: number;
+  titulo: string;
+  periodo: string;
+  detalle: string;
+  etiquetas: string;
+  actual: number;
+}
+
+export interface CertificacionFila {
+  id: number;
+  titulo: string;
+  emisor: string;
+  detalle: string;
+  insignia: "verificada" | "learning";
+}
+
+export interface DocumentoFila {
+  id: number;
+  nombre: string;
+  detalle: string;
+  insignia: string;
+}
+
+export function habilidadesDe(usuarioId: number): HabilidadFila[] {
+  return consultar<HabilidadFila>(
+    `SELECT h.id, h.nombre, h.categoria, h.estado
+     FROM usuario_habilidades uh
+     JOIN habilidades h ON h.id = uh.habilidad_id
+     WHERE uh.usuario_id = ?
+     ORDER BY h.id`,
+    usuarioId,
+  );
+}
+
+export function educacionDe(usuarioId: number): EducacionFila[] {
+  return consultar<EducacionFila>(
+    "SELECT id, institucion, programa, detalle, periodo FROM educacion WHERE usuario_id = ? ORDER BY id",
+    usuarioId,
+  );
+}
+
+export function experienciaDe(usuarioId: number): ExperienciaFila[] {
+  return consultar<ExperienciaFila>(
+    "SELECT id, titulo, periodo, detalle, etiquetas, actual FROM experiencia WHERE usuario_id = ? ORDER BY actual DESC, id",
+    usuarioId,
+  );
+}
+
+export function certificacionesDe(usuarioId: number): CertificacionFila[] {
+  return consultar<CertificacionFila>(
+    "SELECT id, titulo, emisor, detalle, insignia FROM certificaciones WHERE usuario_id = ? ORDER BY id",
+    usuarioId,
+  );
+}
+
+export function documentosDe(usuarioId: number): DocumentoFila[] {
+  return consultar<DocumentoFila>(
+    "SELECT id, nombre, detalle, insignia FROM documentos WHERE usuario_id = ? ORDER BY id",
+    usuarioId,
+  );
+}
+
+/**
+ * Completitud derivada de lo que hay en la base, no un numero fijo.
+ * Los pesos suman 100.
+ */
+export function completitudDe(usuarioId: number): { valor: number; faltantes: string[] } {
+  const usuario = usuarioPorId(usuarioId);
+  if (!usuario) return { valor: 0, faltantes: [] };
+
+  const criterios: { peso: number; cumple: boolean; falta: string }[] = [
+    { peso: 18, cumple: Boolean(usuario.foto_url), falta: "foto de perfil" },
+    { peso: 10, cumple: usuario.resumen.trim().length > 0, falta: "resumen profesional" },
+    { peso: 15, cumple: educacionDe(usuarioId).length > 0, falta: "una entrada de educación" },
+    { peso: 15, cumple: experienciaDe(usuarioId).length > 0, falta: "una entrada de experiencia" },
+    {
+      peso: 15,
+      cumple: certificacionesDe(usuarioId).length > 0,
+      falta: "una certificación",
+    },
+    { peso: 12, cumple: documentosDe(usuarioId).length > 0, falta: "el CV en PDF" },
+    {
+      peso: 15,
+      cumple: habilidadesDe(usuarioId).length >= 5,
+      falta: "al menos cinco habilidades",
+    },
+  ];
+
+  const valor = criterios.reduce((suma, c) => suma + (c.cumple ? c.peso : 0), 0);
+  const faltantes = criterios.filter((c) => !c.cumple).map((c) => c.falta);
+  return { valor, faltantes };
+}
+
+/* ------------------------------------------------------------------ */
+/* Banco de talento                                                    */
+/* ------------------------------------------------------------------ */
+
+export interface Candidato {
+  id: number;
+  nombre: string;
+  iniciales: string;
+  cargo: string;
+  sede: string;
+  area: string;
+  resumen: string;
+  disponibilidad: string;
+  habilidades: string[];
+  completitud: number;
+}
+
+/** Colaboradores con perfil activo, con sus habilidades ya resueltas. */
+export function listarCandidatos(): Candidato[] {
+  const filas = consultar<UsuarioFila>(
+    `SELECT ${CAMPOS_USUARIO} FROM usuarios WHERE activo = 1 ORDER BY id`,
+  );
+
+  return filas.map((fila) => ({
+    id: fila.id,
+    nombre: fila.nombre,
+    iniciales: fila.iniciales,
+    cargo: fila.cargo,
+    sede: fila.sede,
+    area: fila.area,
+    resumen: fila.resumen,
+    disponibilidad: fila.disponibilidad,
+    habilidades: habilidadesDe(fila.id).map((h) => h.nombre),
+    completitud: completitudDe(fila.id).valor,
+  }));
+}
+
+export function sedesDisponibles(): string[] {
+  return consultar<{ nombre: string }>("SELECT nombre FROM sedes ORDER BY orden").map(
+    (f) => f.nombre,
+  );
+}
+
+export function areasDisponibles(): string[] {
+  return consultar<{ area: string }>(
+    "SELECT DISTINCT area FROM usuarios WHERE activo = 1 ORDER BY area",
+  ).map((f) => f.area);
+}
+
+/* ------------------------------------------------------------------ */
+/* Catalogo de habilidades                                             */
+/* ------------------------------------------------------------------ */
+
+export interface CatalogoFila {
+  id: number;
+  nombre: string;
+  categoria: string;
+  estado: "aprobada" | "pendiente";
+  personas: number;
+}
+
+export function catalogoHabilidades(): CatalogoFila[] {
+  return consultar<CatalogoFila>(`
+    SELECT h.id, h.nombre, h.categoria, h.estado,
+           h.personas_base + COUNT(uh.usuario_id) AS personas
+    FROM habilidades h
+    LEFT JOIN usuario_habilidades uh ON uh.habilidad_id = h.id
+    GROUP BY h.id
+    ORDER BY personas DESC, h.nombre
+  `);
+}
+
+export function crearHabilidad(
+  nombre: string,
+  categoria: string,
+  estado: "aprobada" | "pendiente",
+): number {
+  return ejecutar(
+    "INSERT INTO habilidades (nombre, categoria, estado, personas_base) VALUES (?, ?, ?, 0)",
+    nombre.trim(),
+    categoria.trim(),
+    estado,
+  );
+}
+
+export function habilidadPorNombre(nombre: string): HabilidadFila | null {
+  return consultarUno<HabilidadFila>(
+    "SELECT id, nombre, categoria, estado FROM habilidades WHERE lower(nombre) = lower(?)",
+    nombre.trim(),
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Auditoria                                                           */
+/* ------------------------------------------------------------------ */
+
+export interface AuditoriaFila {
+  id: number;
+  actor: string;
+  perfil: string;
+  accion: string;
+  creado_en: string;
+}
+
+export function registrarAuditoria(
+  actorId: number | null,
+  actor: string,
+  perfil: string,
+  accion: string,
+): void {
+  ejecutar(
+    "INSERT INTO auditoria (actor_id, actor, perfil, accion) VALUES (?, ?, ?, ?)",
+    actorId,
+    actor,
+    perfil,
+    accion,
+  );
+}
+
+export function listarAuditoria(limite = 50): AuditoriaFila[] {
+  return consultar<AuditoriaFila>(
+    "SELECT id, actor, perfil, accion, creado_en FROM auditoria ORDER BY creado_en DESC, id DESC LIMIT ?",
+    limite,
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Configuracion y sincronizacion                                      */
+/* ------------------------------------------------------------------ */
+
+export function configuracion(clave: string, porDefecto = ""): string {
+  const fila = consultarUno<{ valor: string }>(
+    "SELECT valor FROM configuracion WHERE clave = ?",
+    clave,
+  );
+  return fila?.valor ?? porDefecto;
+}
+
+export function ultimaSincronizacion(): { origen: string; hecha_en: string } | null {
+  return consultarUno("SELECT origen, hecha_en FROM sincronizaciones WHERE id = 1");
+}
+
+export function tocarSincronizacion(): void {
+  ejecutar("UPDATE sincronizaciones SET hecha_en = datetime('now') WHERE id = 1");
+}

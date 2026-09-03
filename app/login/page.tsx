@@ -1,18 +1,9 @@
-"use client";
-
-import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
-import { Button } from "@/components/ui/Button";
-import { MicrosoftMark } from "@/components/ui/MicrosoftMark";
-import { IconCheck, IconInfo } from "@/components/ui/icons";
-import { useSesion } from "@/lib/session/SesionProvider";
-import { DESCRIPCION_ROL, ETIQUETA_ROL, USUARIOS } from "@/lib/data/usuarios";
-import type { Rol } from "@/types";
-import { cn } from "@/lib/utils/cn";
-
-const ROLES: readonly Rol[] = ["empleado", "reclutador", "administrador"];
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { IconCheck } from "@/components/ui/icons";
+import { LoginForm } from "./LoginForm";
+import { sesionActual } from "@/lib/auth/sesion";
 
 const VENTAJAS = [
   "Cursos de Prediqt Academy y tu avance por curso",
@@ -20,23 +11,18 @@ const VENTAJAS = [
   "Cada acceso queda registrado en la auditoría",
 ] as const;
 
-export default function LoginPage() {
-  const [rol, setRol] = useState<Rol>("empleado");
-  const { iniciarSesion } = useSesion();
-  const router = useRouter();
-
-  function entrar() {
-    iniciarSesion(rol);
-    router.push("/seleccionar-modulo");
-  }
+/** Pantalla 5.1a — Inicio de sesión con correo y contraseña. */
+export default async function LoginPage() {
+  if (await sesionActual()) redirect("/seleccionar-modulo");
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
-      <header className="h-[68px] shrink-0 border-b border-line bg-surface">
-        <div className="mx-auto flex h-full max-w-screenframe items-center justify-between px-6 lg:px-10">
+      <header className="shrink-0 border-b border-line bg-surface">
+        <div className="mx-auto flex min-h-[68px] max-w-screenframe flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10 lg:py-0">
           <Logo variante="publico" />
-          <div className="flex items-center gap-5">
-            <span className="hidden text-[13.5px] text-faint sm:block">
+          <div className="flex items-center gap-4">
+            <ThemeToggle variante="sobre-claro" />
+            <span className="hidden text-[13.5px] text-faint md:block">
               ¿Problemas para entrar?
             </span>
             <span className="text-[13.5px] font-semibold text-accent">Soporte TI</span>
@@ -82,102 +68,8 @@ export default function LoginPage() {
           </p>
         </section>
 
-        <section className="flex items-center justify-center bg-bg px-6 py-10 lg:px-[46px]">
-          <div className="w-full rounded-card-lg border border-line bg-surface px-[34px] py-8 shadow-card">
-            <h2 className="text-[26px] font-bold tracking-[-0.5px] text-ink">Iniciar sesión</h2>
-            <p className="mt-0.5 text-[14.5px] text-muted">Prediqt Learning · Prediqt Talent</p>
-
-            <button
-              type="button"
-              disabled
-              title="Azure Entra ID todavía no está conectado en esta demo"
-              className="mt-5 flex w-full items-center justify-center gap-[11px] rounded-control bg-navy py-3.5 text-[15px] font-semibold text-white opacity-60"
-            >
-              <MicrosoftMark size={17} />
-              Continuar con Microsoft 365
-            </button>
-            <p className="mt-2 text-center text-[12.5px] text-faint">
-              Pendiente de conectar · acceso único con tu cuenta @prediqtdata.com
-            </p>
-
-            <div className="my-5 flex items-center gap-3">
-              <span className="h-px flex-1 bg-line" />
-              <span className="text-[11.5px] font-medium tracking-[0.1em] text-faint">
-                O ELIGE UN ROL DE DEMOSTRACIÓN
-              </span>
-              <span className="h-px flex-1 bg-line" />
-            </div>
-
-            <fieldset className="flex flex-col gap-2.5">
-              <legend className="sr-only">Rol con el que quieres entrar</legend>
-              {ROLES.map((opcion) => {
-                const seleccionado = rol === opcion;
-                const usuario = USUARIOS[opcion];
-                return (
-                  <label
-                    key={opcion}
-                    className={cn(
-                      "flex cursor-pointer items-start gap-3 rounded-control border px-[14px] py-3 transition-colors",
-                      seleccionado
-                        ? "border-accent shadow-focus"
-                        : "border-line-input hover:border-line-strong",
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="rol"
-                      value={opcion}
-                      checked={seleccionado}
-                      onChange={() => setRol(opcion)}
-                      className="sr-only"
-                    />
-                    <span
-                      className={cn(
-                        "mt-0.5 grid h-[18px] w-[18px] shrink-0 place-items-center rounded-full border",
-                        seleccionado ? "border-accent bg-accent text-white" : "border-line-strong",
-                      )}
-                      aria-hidden="true"
-                    >
-                      {seleccionado && <IconCheck size={11} />}
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[15px] font-semibold text-ink">
-                        {ETIQUETA_ROL[opcion]}
-                      </span>
-                      <span className="mt-0.5 block text-[12.5px] leading-[1.45] text-muted">
-                        {DESCRIPCION_ROL[opcion]}
-                      </span>
-                      <span className="mt-1 block text-[12px] text-faint">{usuario.cuenta}</span>
-                    </span>
-                  </label>
-                );
-              })}
-            </fieldset>
-
-            <Button variante="accent" className="mt-4 w-full py-3.5 text-[15px]" onClick={entrar}>
-              Ingresar como {ETIQUETA_ROL[rol]}
-            </Button>
-
-            <div className="my-5 h-px bg-line" />
-            <div className="flex items-start gap-2.5">
-              <IconInfo size={15} className="mt-0.5 shrink-0 text-faint" />
-              <p className="text-[12.5px] leading-[1.5] text-faint">
-                Esta es una sesión simulada en tu navegador para revisar las pantallas. No hay
-                credenciales ni servidor de autenticación todavía.
-              </p>
-            </div>
-            <div className="mt-3 flex gap-2">
-              <Link
-                href="/"
-                className="rounded-[7px] border border-line-input px-3 py-[7px] text-[12.5px] font-medium text-muted"
-              >
-                Volver al inicio
-              </Link>
-              <span className="rounded-[7px] border border-line-input px-3 py-[7px] text-[12.5px] font-medium text-muted">
-                Aviso de cookies
-              </span>
-            </div>
-          </div>
+        <section className="flex items-center justify-center bg-bg px-4 py-10 sm:px-6 lg:px-[46px]">
+          <LoginForm />
         </section>
       </div>
     </div>

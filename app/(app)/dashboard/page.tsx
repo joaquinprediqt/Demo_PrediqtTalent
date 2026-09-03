@@ -12,8 +12,7 @@ import { useSesion } from "@/lib/session/SesionProvider";
 
 /** Pantalla 5.7 — Dashboard de métricas con el tablero de Qlik Sense embebido. */
 export default function DashboardPage() {
-  const { usuario } = useSesion();
-  if (!usuario) return null;
+  const usuario = useSesion();
 
   if (usuario.rol === "empleado") {
     return (

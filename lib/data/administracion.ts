@@ -1,4 +1,4 @@
-import type { Rol, Sede } from "@/types";
+import type { Rol } from "@/types";
 
 /** Datos de la consola de administración (5.6). */
 
@@ -6,7 +6,7 @@ export interface FilaUsuario {
   readonly nombre: string;
   readonly cuenta: string;
   readonly rol: Rol;
-  readonly sede: Sede;
+  readonly sede: string;
   readonly estado: "activo" | "sin-perfil";
 }
 

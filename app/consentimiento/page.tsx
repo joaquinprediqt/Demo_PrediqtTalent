@@ -1,11 +1,7 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
-import { IconCheck, IconShield } from "@/components/ui/icons";
-import { useSesion } from "@/lib/session/SesionProvider";
-import { cn } from "@/lib/utils/cn";
+import { redirect } from "next/navigation";
+import { IconShield } from "@/components/ui/icons";
+import { ConsentForm } from "./ConsentForm";
+import { sesionActual } from "@/lib/auth/sesion";
 
 const FILAS = [
   {
@@ -15,8 +11,7 @@ const FILAS = [
   },
   {
     concepto: "CV en PDF",
-    detalle:
-      "Para que Reclutadores de Prediqt puedan revisar tu trayectoria al armar un equipo.",
+    detalle: "Para que Reclutadores de Prediqt puedan revisar tu trayectoria al armar un equipo.",
   },
   {
     concepto: "Certificados",
@@ -29,32 +24,16 @@ const FILAS = [
   },
 ] as const;
 
-export default function ConsentimientoPage() {
-  const { usuario, cargando, aceptarConsentimiento } = useSesion();
-  const [autorizado, setAutorizado] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!cargando && !usuario) router.replace("/login");
-  }, [cargando, usuario, router]);
-
-  if (cargando || !usuario) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-bg">
-        <p className="text-body text-muted">Cargando sesión…</p>
-      </div>
-    );
-  }
-
-  function continuar() {
-    aceptarConsentimiento();
-    router.push("/perfil");
-  }
+/** Pantalla 5.2 — Consentimiento de datos en el primer inicio de sesión. */
+export default async function ConsentimientoPage() {
+  const usuario = await sesionActual();
+  if (!usuario) redirect("/login");
+  if (usuario.consentimiento) redirect("/perfil");
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
       <header className="h-[60px] shrink-0 bg-grad-header">
-        <div className="mx-auto flex h-full max-w-screenframe items-center px-6 lg:px-10">
+        <div className="mx-auto flex h-full max-w-screenframe items-center px-4 sm:px-6 lg:px-10">
           <span className="flex items-center gap-[10px]">
             <span className="grid h-[26px] w-[26px] place-items-center rounded-[7px] bg-accent text-[13px] font-bold text-white">
               P
@@ -64,17 +43,17 @@ export default function ConsentimientoPage() {
         </div>
       </header>
 
-      <main className="grid flex-1 place-items-center px-6 py-10">
-        <div className="w-full max-w-[720px] rounded-card-lg border border-line bg-surface px-6 py-8 shadow-card sm:px-[44px] sm:py-10">
+      <main className="grid flex-1 place-items-center px-4 py-10 sm:px-6">
+        <div className="w-full max-w-[720px] rounded-card-lg border border-line bg-surface px-5 py-8 shadow-card sm:px-[44px] sm:py-10">
           <div className="flex items-center gap-3">
             <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-accent-soft text-accent">
               <IconShield size={20} />
             </span>
             <div>
-              <h1 className="text-[24px] font-bold tracking-[-0.4px] text-ink">
+              <h1 className="text-[21px] font-bold tracking-[-0.4px] text-ink sm:text-[24px]">
                 Antes de continuar, {usuario.nombreCorto}
               </h1>
-              <p className="text-[14px] text-muted">Sesión iniciada como {usuario.cuenta}</p>
+              <p className="text-[14px] text-muted">Sesión iniciada como {usuario.correo}</p>
             </div>
           </div>
 
@@ -99,56 +78,7 @@ export default function ConsentimientoPage() {
             ))}
           </div>
 
-          <label className="mt-[22px] flex cursor-pointer items-start gap-3 rounded-[10px] border border-line bg-bg px-[18px] py-4">
-            <input
-              type="checkbox"
-              checked={autorizado}
-              onChange={(e) => setAutorizado(e.target.checked)}
-              className="sr-only"
-            />
-            <span
-              className={cn(
-                "mt-0.5 grid h-[19px] w-[19px] shrink-0 place-items-center rounded-[5px] border",
-                autorizado ? "border-accent bg-accent text-white" : "border-line-strong bg-surface",
-              )}
-              aria-hidden="true"
-            >
-              {autorizado && <IconCheck size={13} />}
-            </span>
-            <span className="text-[14.5px] leading-[1.5] text-ink-2">
-              Autorizo a Prediqt a tratar mis datos personales y documentos para fines de gestión
-              interna de talento y formación, conforme a la{" "}
-              <span className="font-semibold text-accent">
-                Ley de Protección de Datos Personales del Perú (Ley N.° 29733)
-              </span>
-              . Puedo revocar esta autorización desde Preferencias.
-            </span>
-          </label>
-
-          <div className="mt-7 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-            <p className="text-[13.5px] text-faint">
-              Sin este consentimiento no se crea tu perfil de talento.
-            </p>
-            <div className="flex gap-2.5">
-              <Button
-                variante="sutil"
-                tamano="md"
-                className="px-[18px] py-[11px] text-[14.5px]"
-                onClick={() => router.push("/seleccionar-modulo")}
-              >
-                Prefiero no ahora
-              </Button>
-              <Button
-                variante="navy"
-                tamano="md"
-                className="px-[26px] py-[11px] text-[14.5px]"
-                disabled={!autorizado}
-                onClick={continuar}
-              >
-                Continuar
-              </Button>
-            </div>
-          </div>
+          <ConsentForm />
         </div>
       </main>
     </div>

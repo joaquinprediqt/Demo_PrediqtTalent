@@ -15,10 +15,9 @@ type Pestana = (typeof PESTANAS_ADMIN)[number];
 
 /** Pantalla 5.6 — Consola de administración. */
 export default function AdministracionPage() {
-  const { usuario } = useSesion();
+  const usuario = useSesion();
   const [pestana, setPestana] = useState<Pestana>("Usuarios y roles");
 
-  if (!usuario) return null;
 
   if (usuario.rol !== "administrador") {
     return (

@@ -3,19 +3,20 @@ export type Rol = "empleado" | "reclutador" | "administrador";
 
 export type Modulo = "learning" | "talent";
 
-export type Sede = "Lima" | "Quito" | "Guayaquil" | "Lausana";
-
 export type Tema = "claro" | "oscuro";
 
+/** Forma serializable del usuario que viaja del servidor al cliente. */
 export interface Usuario {
-  readonly rol: Rol;
+  readonly id: number;
   readonly nombre: string;
   readonly nombreCorto: string;
   readonly cargo: string;
-  readonly cuenta: string;
+  readonly correo: string;
   readonly iniciales: string;
-  readonly sede: Sede;
+  readonly sede: string;
   readonly area: string;
+  readonly rol: Rol;
+  readonly consentimiento: boolean;
 }
 
 export interface EnlaceNav {

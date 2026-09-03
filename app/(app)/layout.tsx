@@ -1,31 +1,19 @@
-"use client";
-
-import { useEffect, type ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
 import { AppHeader } from "@/components/layout/AppHeader";
-import { useSesion } from "@/lib/session/SesionProvider";
+import { SesionProvider } from "@/lib/session/SesionProvider";
+import { sesionActual } from "@/lib/auth/sesion";
 
-/** Zona autenticada: sin rol elegido en 5.1a se vuelve al inicio de sesion. */
-export default function AppLayout({ children }: { children: ReactNode }) {
-  const { usuario, cargando } = useSesion();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!cargando && !usuario) router.replace("/login");
-  }, [cargando, usuario, router]);
-
-  if (cargando || !usuario) {
-    return (
-      <div className="grid min-h-screen place-items-center bg-bg">
-        <p className="text-body text-muted">Cargando sesión…</p>
-      </div>
-    );
-  }
+/** Zona autenticada: sin cookie válida se vuelve al inicio de sesión. */
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  const usuario = await sesionActual();
+  if (!usuario) redirect("/login");
 
   return (
-    <div className="flex min-h-screen flex-col bg-bg">
-      <AppHeader />
-      <main className="flex-1">{children}</main>
-    </div>
+    <SesionProvider usuario={usuario}>
+      <div className="flex min-h-screen flex-col bg-bg">
+        <AppHeader />
+        <main className="flex-1">{children}</main>
+      </div>
+    </SesionProvider>
   );
 }

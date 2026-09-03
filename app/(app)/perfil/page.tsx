@@ -1,33 +1,84 @@
-"use client";
-
+import { redirect } from "next/navigation";
 import { ProfileSidebar } from "@/components/perfil/ProfileSidebar";
 import { ProfileMain } from "@/components/perfil/ProfileMain";
-import { useSesion } from "@/lib/session/SesionProvider";
-import { USUARIOS } from "@/lib/data/usuarios";
+import { etiquetaActor, sesionActual } from "@/lib/auth/sesion";
+import { ETIQUETA_ROL } from "@/lib/data/usuarios";
+import {
+  certificacionesDe,
+  completitudDe,
+  documentosDe,
+  educacionDe,
+  experienciaDe,
+  habilidadesDe,
+  registrarAuditoria,
+  usuarioPorCorreo,
+  usuarioPorId,
+} from "@/lib/db/consultas";
 
 /**
- * Pantalla 5.3 — Perfil del empleado, vista propia y editable.
- * Reclutador y Administrador ven el mismo perfil de muestra en modo consulta.
+ * Pantalla 5.3 — Perfil del empleado.
+ * Un Reclutador o Administrador puede abrir el perfil de otra persona con
+ * ?id=, y esa consulta queda registrada en la auditoría de accesos.
  */
-export default function PerfilPage() {
-  const { usuario } = useSesion();
-  if (!usuario) return null;
+export default async function PerfilPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}) {
+  const sesion = await sesionActual();
+  if (!sesion) redirect("/login");
+  if (sesion.rol === "empleado" && !sesion.consentimiento) redirect("/consentimiento");
 
-  const perfil = usuario.rol === "empleado" ? usuario : USUARIOS.empleado;
-  const esPropio = usuario.rol === "empleado";
+  const { id } = await searchParams;
+  const solicitado = id ? Number(id) : sesion.id;
+  const puedeVerOtros = sesion.rol !== "empleado";
+  const objetivoId = puedeVerOtros ? solicitado : sesion.id;
+
+  const perfil = usuarioPorId(objetivoId) ?? usuarioPorCorreo(sesion.correo);
+  if (!perfil) redirect("/login");
+
+  const esPropio = perfil.id === sesion.id;
+
+  if (!esPropio) {
+    registrarAuditoria(
+      sesion.id,
+      etiquetaActor(sesion, ETIQUETA_ROL[sesion.rol]),
+      perfil.nombre,
+      "Vio perfil completo",
+    );
+  }
+
+  const [habilidades, documentos, educacion, experiencia, certificaciones] = [
+    habilidadesDe(perfil.id),
+    documentosDe(perfil.id),
+    educacionDe(perfil.id),
+    experienciaDe(perfil.id),
+    certificacionesDe(perfil.id),
+  ];
+  const { valor: completitud, faltantes } = completitudDe(perfil.id);
 
   return (
-    <div className="mx-auto w-full max-w-screenframe px-5 py-6 lg:px-7">
+    <div className="mx-auto w-full max-w-screenframe px-4 py-6 sm:px-5 lg:px-7">
       {!esPropio && (
         <p className="mb-4 rounded-card border border-line bg-surface px-4 py-3 text-[13.5px] text-muted">
-          Estás viendo el perfil de {perfil.nombre} como {usuario.rol}. Esta consulta queda
-          registrada en la auditoría de accesos.
+          Estás viendo el perfil de {perfil.nombre} como {ETIQUETA_ROL[sesion.rol]}. Esta consulta
+          quedó registrada en la auditoría de accesos.
         </p>
       )}
 
       <div className="grid grid-cols-1 gap-[22px] lg:grid-cols-[352px_1fr]">
-        <ProfileSidebar usuario={perfil} />
-        <ProfileMain />
+        <ProfileSidebar
+          usuario={perfil}
+          habilidades={habilidades}
+          documentos={documentos}
+          completitud={completitud}
+          faltantes={faltantes}
+        />
+        <ProfileMain
+          educacion={educacion}
+          experiencia={experiencia}
+          certificaciones={certificaciones}
+        />
       </div>
     </div>
   );

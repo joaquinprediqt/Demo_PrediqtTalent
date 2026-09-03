@@ -49,11 +49,40 @@ Para compilar, para primero el servidor de desarrollo.
 | 5.6 Consola de administración | `/administracion` | Administrador |
 | 5.7 Dashboard de métricas | `/dashboard` | Reclutador, Administrador |
 
-## Sesión simulada
+## Base de datos
 
-Todavía no hay Azure Entra ID. En `/login` se elige uno de los tres roles y la sesión se
-guarda en `localStorage` (`lib/session/SesionProvider.tsx`). El botón de Microsoft 365
-aparece deshabilitado a propósito.
+SQLite a través de `node:sqlite`, el módulo integrado en Node 22 y posteriores. No hay
+dependencias que compilar ni servidor que levantar. El archivo vive en `data/prediqt.db`,
+está fuera del control de versiones y **se crea y siembra solo** la primera vez que se
+consulta.
+
+- Esquema: `lib/db/esquema.sql`
+- Datos iniciales del canvas: `lib/db/semilla.ts`
+- Consultas tipadas: `lib/db/consultas.ts`
+
+Para empezar de cero, borra `data/` y recarga.
+
+Las cifras de la organización (128 personas, 64 con SQL, 65 en Lima) no caben en ocho
+usuarios de demostración. Se modelan como `personas_base` en `habilidades` y `base` en
+`sedes`: el total mostrado es esa base más las filas reales, de modo que los gráficos
+coinciden con el canvas y a la vez reaccionan a lo que se cree en la demo.
+
+## Acceso
+
+Todavía no hay Azure Entra ID, así que el botón de Microsoft 365 está deshabilitado a
+propósito. El acceso es con correo y contraseña contra la base: la contraseña se guarda
+derivada con `scrypt` y sal por usuario (`lib/auth/password.ts`), y la sesión es una fila
+en `sesiones` referenciada por una cookie `httpOnly` (`lib/auth/sesion.ts`).
+
+| Correo | Contraseña | Rol |
+|---|---|---|
+| `mcastillo@prediqtdata.com` | `Empleado2026` | Empleado |
+| `jcerna@prediqtdata.com` | `Reclutador2026` | Reclutador |
+| `radmin@prediqtdata.com` | `Admin2026` | Administrador |
+
+Hay cinco cuentas más de empleados para poblar la búsqueda de talento; todas usan
+`Empleado2026`. `cferreira@prediqtdata.com` está sincronizada pero sin perfil activo, para
+poder ver ese estado en la consola de administración.
 
 ## Tokens de diseño
 

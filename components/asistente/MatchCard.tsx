@@ -43,7 +43,7 @@ export function MatchCard({ coincidencia }: { coincidencia: Coincidencia }) {
 
       <div className="mt-3 flex gap-2 border-t border-line-soft pt-[11px]">
         <Link
-          href="/perfil"
+          href={`/perfil?id=${coincidencia.id}`}
           className={cn(
             "flex-1 rounded-[8px] py-2 text-center text-[13px] font-semibold transition-colors",
             coincidencia.destacado
