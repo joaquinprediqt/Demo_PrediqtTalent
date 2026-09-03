@@ -96,5 +96,3 @@ export const CERTIFICACIONES_PROVEEDOR: readonly BarraProveedor[] = [
   { proveedor: "Prediqt Academy", total: 5, ancho: 12, color: "#7FA8C4" },
 ];
 
-export const ESTADO_SINCRONIZACION =
-  'Qlik Sense · app "Prediqt HR — Talento" · sincronizado hace 12 min';
