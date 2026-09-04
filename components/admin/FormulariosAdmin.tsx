@@ -11,6 +11,7 @@ import { SIN_ESTADO_ADMIN } from "@/app/(app)/administracion/estado";
 import { ETIQUETA_ROL } from "@/lib/data/usuarios";
 import type { Rol } from "@/types";
 import { Spinner } from "@/components/ui/Spinner";
+import { BotonCancelar } from "@/components/ui/BotonCancelar";
 
 const ROLES: readonly Rol[] = ["empleado", "reclutador", "administrador"];
 
@@ -57,13 +58,22 @@ export function FormAsignarRol({
           </select>
         </label>
 
-        <button
-          type="submit"
-          disabled={pendiente}
-          className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
-        >
-          {pendiente ? (<><Spinner /> Guardando…</>) : "Aplicar"}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={pendiente}
+            className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
+          >
+            {pendiente ? (
+              <>
+                <Spinner /> Guardando…
+              </>
+            ) : (
+              "Aplicar"
+            )}
+          </button>
+          <BotonCancelar />
+        </div>
 
         {estado.error && (
           <p className="w-full text-[12.5px] text-[#8A3B2F]">{estado.error}</p>
@@ -110,13 +120,22 @@ export function FormNuevaHabilidad() {
           Aprobada de inmediato (si no, queda pendiente de aprobar)
         </label>
 
-        <button
-          type="submit"
-          disabled={pendiente}
-          className="mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
-        >
-          {pendiente ? (<><Spinner /> Guardando…</>) : "Agregar al catálogo"}
-        </button>
+        <div className="mt-2.5 flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={pendiente}
+            className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
+          >
+            {pendiente ? (
+              <>
+                <Spinner /> Guardando…
+              </>
+            ) : (
+              "Agregar al catálogo"
+            )}
+          </button>
+          <BotonCancelar />
+        </div>
 
         {estado.error && <p className="mt-2 text-[12.5px] text-[#8A3B2F]">{estado.error}</p>}
         {estado.ok && <p className="mt-2 text-[12.5px] text-accent-strong">{estado.ok}</p>}

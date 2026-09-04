@@ -4,6 +4,7 @@ import { useActionState, useRef } from "react";
 import { IconPlus } from "@/components/ui/icons";
 import { SIN_ESTADO, type EstadoPerfil } from "@/app/(app)/perfil/estado";
 import { Spinner } from "@/components/ui/Spinner";
+import { BotonCancelar } from "@/components/ui/BotonCancelar";
 
 export interface Campo {
   readonly nombre: string;
@@ -123,13 +124,22 @@ export function AgregarEntrada({ etiqueta, titulo, campos, accion }: Props) {
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={pendiente}
-          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-[#12564F] active:scale-[.98] disabled:opacity-60"
-        >
-          {pendiente ? (<><Spinner /> Guardando…</>) : "Guardar"}
-        </button>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={pendiente}
+            className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-[#12564F] active:scale-[.98] disabled:opacity-60"
+          >
+            {pendiente ? (
+              <>
+                <Spinner /> Guardando…
+              </>
+            ) : (
+              "Guardar"
+            )}
+          </button>
+          <BotonCancelar />
+        </div>
       </form>
     </details>
   );

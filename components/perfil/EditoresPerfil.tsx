@@ -15,6 +15,7 @@ import {
 import { SIN_ESTADO } from "@/app/(app)/perfil/estado";
 import type { DocumentoFila, HabilidadFila } from "@/lib/db/consultas";
 import { Spinner } from "@/components/ui/Spinner";
+import { BotonCancelar } from "@/components/ui/BotonCancelar";
 
 const MAX_FOTO_BYTES = 220_000;
 
@@ -102,13 +103,22 @@ export function EditorResumen({ resumen }: { resumen: string }) {
           placeholder="Una o dos frases sobre tu especialidad."
           className="w-full resize-y rounded-[8px] border border-line-input bg-transparent px-3 py-2 text-[13px] text-ink outline-none focus:border-accent"
         />
-        <button
-          type="submit"
-          disabled={pendiente}
-          className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[12.5px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
-        >
-          {pendiente ? (<><Spinner /> Guardando…</>) : "Guardar resumen"}
-        </button>
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <button
+            type="submit"
+            disabled={pendiente}
+            className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[12.5px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
+          >
+            {pendiente ? (
+              <>
+                <Spinner /> Guardando…
+              </>
+            ) : (
+              "Guardar resumen"
+            )}
+          </button>
+          <BotonCancelar />
+        </div>
         {estado.ok && <p className="mt-1.5 text-[12px] text-accent-strong">{estado.ok}</p>}
       </form>
     </details>
