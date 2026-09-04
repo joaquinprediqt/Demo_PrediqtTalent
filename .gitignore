@@ -32,3 +32,6 @@ npm-debug.log*
 
 # Base de datos local de la demo (se siembra sola al arrancar)
 data/
+
+# Documentos generados (Word, Excel, PPT, PDF): son entregables, no codigo.
+docs/
