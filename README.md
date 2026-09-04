@@ -79,6 +79,33 @@ docker compose up -d --build
   durante una demostración sobrevive a `docker compose restart`. Se siembra sola en el
   primer acceso que la consulta, no al arrancar el contenedor.
 
+### Publicar la demo por un túnel
+
+Para compartir la demo (dev tunnels de VS Code, ngrok, Cloudflare) no hace falta nada
+extra: los dominios de esos servicios ya están autorizados en `next.config.ts`.
+
+El motivo es que Next protege los Server Actions contra CSRF comparando la cabecera
+`origin` del navegador con el host que reenvía el proxy (`x-forwarded-host`). Al pasar por
+un túnel los dos valores dejan de coincidir y el inicio de sesión falla así:
+
+```
+Application error: a server-side exception has occurred
+Digest: 2473552661
+```
+
+En el log del contenedor aparece `Invalid Server Actions request`. La lista
+`experimental.serverActions.allowedOrigins` declara la excepción con comodines, porque la
+URL del túnel cambia en cada sesión.
+
+**Para otro dominio** (un servidor de pruebas, un proxy propio), agrégalo al construir:
+
+```bash
+ORIGENES_PERMITIDOS=demo.prediqt.ec docker compose up -d --build
+```
+
+Tiene que ser en el build, no al arrancar: `output: "standalone"` deja la configuración
+horneada en el servidor generado.
+
 ### El puerto 3000
 
 `docker compose` y `npm run dev` usan el mismo puerto: solo puede haber uno corriendo a la
