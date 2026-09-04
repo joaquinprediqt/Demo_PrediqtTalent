@@ -30,8 +30,10 @@ npm-debug.log*
 .vercel
 *.tsbuildinfo
 
-# Base de datos local de la demo (se siembra sola al arrancar)
-data/
+# Base de datos local de la demo (se siembra sola al arrancar).
+# La barra inicial ancla la regla a la raiz: sin ella tambien capturaba
+# lib/data/, que es codigo fuente.
+/data/
 
 # Documentos generados (Word, Excel, PPT, PDF): son entregables, no codigo.
-docs/
+/docs/
