@@ -3,6 +3,7 @@
 import { useActionState, useRef } from "react";
 import { IconPlus } from "@/components/ui/icons";
 import { SIN_ESTADO, type EstadoPerfil } from "@/app/(app)/perfil/estado";
+import { Spinner } from "@/components/ui/Spinner";
 
 export interface Campo {
   readonly nombre: string;
@@ -33,8 +34,12 @@ export function AgregarEntrada({ etiqueta, titulo, campos, accion }: Props) {
 
   return (
     <details ref={detalles} className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-[5px] text-[12.5px] font-semibold text-accent transition-opacity hover:opacity-80">
-        <IconPlus size={13} />
+      <summary className="flex w-fit cursor-pointer list-none items-center gap-[5px] rounded-[6px] text-[12.5px] font-semibold text-accent transition-opacity hover:opacity-80">
+        {/* El + gira hasta convertirse en una × cuando el panel esta abierto. */}
+        <IconPlus
+          size={13}
+          className="transition-transform duration-200 group-open:rotate-45"
+        />
         {etiqueta}
       </summary>
 
@@ -47,7 +52,7 @@ export function AgregarEntrada({ etiqueta, titulo, campos, accion }: Props) {
             else campo.value = "";
           });
         }}
-        className="mt-3 rounded-[10px] border border-line-soft bg-surface-raised p-3.5"
+        className="mt-3 animate-desplegar rounded-[10px] border border-line-soft bg-surface-raised p-3.5"
       >
         <p className="text-[12px] font-semibold tracking-[0.06em] text-muted">
           {titulo.toUpperCase()}
@@ -121,9 +126,9 @@ export function AgregarEntrada({ etiqueta, titulo, campos, accion }: Props) {
         <button
           type="submit"
           disabled={pendiente}
-          className="mt-3 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-colors hover:bg-[#12564F] disabled:opacity-60"
+          className="mt-3 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-[#12564F] active:scale-[.98] disabled:opacity-60"
         >
-          {pendiente ? "Guardando…" : "Guardar"}
+          {pendiente ? (<><Spinner /> Guardando…</>) : "Guardar"}
         </button>
       </form>
     </details>

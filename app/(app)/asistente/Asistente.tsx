@@ -9,6 +9,7 @@ import type { ResultadoAsistente } from "@/lib/asistente/motor";
 import { accionConsultarAsistente } from "./acciones";
 import { Chip } from "@/components/ui/Chip";
 import { TablaComparacion } from "@/components/asistente/TablaComparacion";
+import { Spinner } from "@/components/ui/Spinner";
 
 interface Props {
   usuario: { rol: string; correo: string; etiquetaRol: string };
@@ -87,7 +88,7 @@ export function Asistente({ usuario, inicial }: Props) {
             onClick={() => consultar(borrador)}
           >
             <IconSend size={15} />
-            {pendiente ? "Buscando…" : "Buscar candidatos"}
+            {pendiente ? (<><Spinner /> Buscando…</>) : "Buscar candidatos"}
           </Button>
         </div>
       </section>

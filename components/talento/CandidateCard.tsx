@@ -11,7 +11,7 @@ interface Props {
 /** Tarjeta de perfil de la rejilla de resultados (5.4). */
 export function CandidateCard({ candidato, faltantes = [] }: Props) {
   return (
-    <article className="flex flex-col rounded-card border border-line bg-surface px-5 py-[18px]">
+    <article className="flex animate-aparecer flex-col rounded-card border border-line bg-surface px-5 py-[18px] transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-accent-light hover:shadow-card-hover">
       <div className="flex items-center gap-3">
         <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-steel-soft text-[14px] font-semibold text-steel">
           {candidato.iniciales}

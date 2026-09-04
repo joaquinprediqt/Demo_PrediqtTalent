@@ -5,10 +5,13 @@ export function Card({
   children,
   className,
   padding = "md",
+  animada = true,
 }: {
   children: ReactNode;
   className?: string;
   padding?: "none" | "sm" | "md" | "lg";
+  /** Entrada progresiva al montar. Se desactiva en listas muy largas. */
+  animada?: boolean;
 }) {
   const paddings = {
     none: "",
@@ -21,6 +24,7 @@ export function Card({
     <section
       className={cn(
         "rounded-card border border-line bg-surface",
+        animada && "animate-aparecer",
         paddings[padding],
         className,
       )}

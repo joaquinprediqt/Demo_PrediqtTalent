@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MicrosoftMark } from "@/components/ui/MicrosoftMark";
 import { IconEye, IconInfo } from "@/components/ui/icons";
 import { accionIniciarSesion, type EstadoLogin } from "@/lib/auth/acciones";
+import { Spinner } from "@/components/ui/Spinner";
 
 const INICIAL: EstadoLogin = { error: null };
 
@@ -117,9 +118,9 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={pendiente}
-          className="mt-1 w-full rounded-control bg-accent py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-accent-strong disabled:opacity-60"
+          className="mt-1 inline-flex w-full items-center justify-center gap-2 rounded-control bg-accent py-3.5 text-[15px] font-semibold text-white transition-[background-color,transform] duration-150 hover:bg-accent-strong active:scale-[.99] disabled:opacity-60"
         >
-          {pendiente ? "Comprobando…" : "Ingresar"}
+          {pendiente ? (<><Spinner size={14} /> Comprobando…</>) : "Ingresar"}
         </button>
       </form>
 

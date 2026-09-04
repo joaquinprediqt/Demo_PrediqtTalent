@@ -10,6 +10,7 @@ import {
 import { SIN_ESTADO_ADMIN } from "@/app/(app)/administracion/estado";
 import { ETIQUETA_ROL } from "@/lib/data/usuarios";
 import type { Rol } from "@/types";
+import { Spinner } from "@/components/ui/Spinner";
 
 const ROLES: readonly Rol[] = ["empleado", "reclutador", "administrador"];
 
@@ -32,7 +33,7 @@ export function FormAsignarRol({
 
       <form
         action={enviar}
-        className="mt-2 flex flex-wrap items-end gap-2 rounded-[10px] border border-line-soft bg-surface-raised p-3"
+        className="mt-2 animate-desplegar flex flex-wrap items-end gap-2 rounded-[10px] border border-line-soft bg-surface-raised p-3"
       >
         <label className="flex min-w-[150px] flex-1 flex-col gap-1">
           <span className="text-[12px] font-medium text-muted">Cuenta</span>
@@ -59,9 +60,9 @@ export function FormAsignarRol({
         <button
           type="submit"
           disabled={pendiente}
-          className="rounded-[8px] bg-accent px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-60"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-accent px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
         >
-          {pendiente ? "Guardando…" : "Aplicar"}
+          {pendiente ? (<><Spinner /> Guardando…</>) : "Aplicar"}
         </button>
 
         {estado.error && (
@@ -79,14 +80,14 @@ export function FormNuevaHabilidad() {
 
   return (
     <details className="group">
-      <summary className="flex cursor-pointer list-none items-center gap-1 text-[12.5px] font-semibold text-accent">
-        <IconPlus size={13} />
+      <summary className="flex w-fit cursor-pointer list-none items-center gap-1 text-[12.5px] font-semibold text-accent">
+        <IconPlus size={13} className="transition-transform duration-200 group-open:rotate-45" />
         Nueva habilidad
       </summary>
 
       <form
         action={enviar}
-        className="mt-2.5 rounded-[10px] border border-line-soft bg-surface-raised p-3"
+        className="mt-2.5 animate-desplegar rounded-[10px] border border-line-soft bg-surface-raised p-3"
       >
         <div className="flex flex-wrap gap-2">
           <label className="flex min-w-[120px] flex-1 flex-col gap-1">
@@ -112,9 +113,9 @@ export function FormNuevaHabilidad() {
         <button
           type="submit"
           disabled={pendiente}
-          className="mt-2.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white disabled:opacity-60"
+          className="mt-2.5 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[13px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
         >
-          {pendiente ? "Guardando…" : "Agregar al catálogo"}
+          {pendiente ? (<><Spinner /> Guardando…</>) : "Agregar al catálogo"}
         </button>
 
         {estado.error && <p className="mt-2 text-[12.5px] text-[#8A3B2F]">{estado.error}</p>}

@@ -89,6 +89,46 @@ const config: Config = {
       maxWidth: {
         screenframe: "1440px",
       },
+      /**
+       * Movimiento discreto: entradas cortas y sin rebotes. Todo esto queda
+       * anulado por el bloque prefers-reduced-motion de app/globals.css.
+       */
+      keyframes: {
+        aparecer: {
+          from: { opacity: "0", transform: "translateY(6px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        desplegar: {
+          from: { opacity: "0", transform: "translateY(-4px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+        globo: {
+          from: { opacity: "0", transform: "translateY(3px) scale(.96)" },
+          to: { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        // Las barras crecen desde su base, no desde el centro.
+        crecer: {
+          from: { transform: "scaleY(0)" },
+          to: { transform: "scaleY(1)" },
+        },
+        // Igual, en horizontal, para las barras de proveedores.
+        estirar: {
+          from: { transform: "scaleX(0)" },
+          to: { transform: "scaleX(1)" },
+        },
+        latido: {
+          "0%, 100%": { opacity: "1", transform: "scale(1)" },
+          "50%": { opacity: ".55", transform: "scale(.82)" },
+        },
+      },
+      animation: {
+        aparecer: "aparecer .28s ease-out both",
+        desplegar: "desplegar .18s ease-out both",
+        globo: "globo .13s ease-out both",
+        crecer: "crecer .5s cubic-bezier(.22,1,.36,1) both",
+        estirar: "estirar .5s cubic-bezier(.22,1,.36,1) both",
+        latido: "latido 2.4s ease-in-out infinite",
+      },
     },
   },
   plugins: [],

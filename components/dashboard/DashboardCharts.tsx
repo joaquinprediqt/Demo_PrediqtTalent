@@ -26,7 +26,7 @@ function Globo({
   return (
     <span
       role="tooltip"
-      className={`pointer-events-none absolute z-10 whitespace-nowrap rounded-[6px] bg-navy px-2 py-1 text-[11.5px] font-medium text-white shadow-card ${
+      className={`pointer-events-none absolute z-10 whitespace-nowrap rounded-[6px] bg-navy px-2 py-1 text-[11.5px] font-medium text-white shadow-card animate-globo ${
         posicion === "arriba"
           ? "bottom-full left-1/2 mb-1.5 -translate-x-1/2"
           : "left-full top-1/2 ml-2 -translate-y-1/2"
@@ -49,7 +49,7 @@ export function KpiTile({
   tono?: "accent" | "neutro";
 }) {
   return (
-    <div className="rounded-[10px] border border-line bg-surface px-4 py-3.5 transition-colors hover:border-accent-light">
+    <div className="rounded-[10px] border border-line bg-surface px-4 py-3.5 transition-[border-color,box-shadow,transform] duration-150 hover:-translate-y-0.5 hover:border-accent-light hover:shadow-card">
       <p className="text-[12px] font-medium text-muted">{etiqueta}</p>
       <p className="mt-1 text-[28px] font-bold leading-[1.1] text-ink sm:text-[32px]">{valor}</p>
       <p
@@ -127,7 +127,7 @@ export function SkillsBarChart({
 
                   <span className="text-[12px] font-semibold text-ink">{habilidad.personas}</span>
                   <span
-                    className="w-full rounded-t-[4px] transition-[opacity,filter] duration-150"
+                    className="w-full origin-bottom animate-crecer rounded-t-[4px] transition-[opacity,filter] duration-150"
                     style={{
                       backgroundColor: colorPorIndice(PALETA_BARRAS, indice),
                       height: `${(habilidad.personas / maximo) * 100}%`,
@@ -435,7 +435,7 @@ export function ProviderBars({
                 </span>
                 <span className="h-3 flex-1 overflow-hidden rounded-[3px] bg-track">
                   <span
-                    className="block h-full transition-[opacity,filter] duration-150"
+                    className="block h-full origin-left animate-estirar transition-[opacity,filter] duration-150"
                     style={{
                       width: `${(barra.total / maximo) * 100}%`,
                       backgroundColor: colorPorIndice(PALETA_BARRAS, indice),

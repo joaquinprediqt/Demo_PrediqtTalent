@@ -83,3 +83,21 @@
     outline-offset: 2px;
   }
 }
+
+@layer base {
+  /*
+   * Quien pide menos movimiento en su sistema operativo no debe recibir
+   * animaciones. Se anulan todas de una vez, en lugar de recordar la
+   * excepcion en cada componente.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

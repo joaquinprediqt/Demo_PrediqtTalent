@@ -14,6 +14,7 @@ import {
 } from "@/app/(app)/perfil/acciones";
 import { SIN_ESTADO } from "@/app/(app)/perfil/estado";
 import type { DocumentoFila, HabilidadFila } from "@/lib/db/consultas";
+import { Spinner } from "@/components/ui/Spinner";
 
 const MAX_FOTO_BYTES = 220_000;
 
@@ -88,12 +89,12 @@ export function EditorResumen({ resumen }: { resumen: string }) {
   const [estado, enviar, pendiente] = useActionState(accionGuardarResumen, SIN_ESTADO);
 
   return (
-    <details className="mt-3 w-full text-left">
-      <summary className="flex cursor-pointer list-none items-center gap-[5px] text-[12.5px] font-semibold text-accent">
+    <details className="group mt-3 w-full text-left">
+      <summary className="flex w-fit cursor-pointer list-none items-center gap-[5px] text-[12.5px] font-semibold text-accent">
         <IconPencil size={13} />
         {resumen ? "Editar resumen" : "Agregar resumen"}
       </summary>
-      <form action={enviar} className="mt-2">
+      <form action={enviar} className="mt-2 animate-desplegar">
         <textarea
           name="resumen"
           rows={3}
@@ -104,9 +105,9 @@ export function EditorResumen({ resumen }: { resumen: string }) {
         <button
           type="submit"
           disabled={pendiente}
-          className="mt-2 rounded-[8px] bg-navy px-4 py-2 text-[12.5px] font-semibold text-white disabled:opacity-60"
+          className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-[8px] bg-navy px-4 py-2 text-[12.5px] font-semibold text-white transition-transform duration-150 active:scale-[.98] disabled:opacity-60"
         >
-          {pendiente ? "Guardando…" : "Guardar resumen"}
+          {pendiente ? (<><Spinner /> Guardando…</>) : "Guardar resumen"}
         </button>
         {estado.ok && <p className="mt-1.5 text-[12px] text-accent-strong">{estado.ok}</p>}
       </form>

@@ -26,8 +26,14 @@ interface BaseProps {
   children: ReactNode;
 }
 
+/**
+ * El boton reacciona al pasar el cursor y se hunde levemente al pulsarlo, para
+ * que la pulsacion se sienta antes de que llegue la respuesta del servidor.
+ */
 const base =
-  "inline-flex items-center justify-center gap-[9px] font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex items-center justify-center gap-[9px] font-semibold transition-[color,background-color,border-color,box-shadow,transform] duration-150 " +
+  "hover:-translate-y-px active:translate-y-0 active:scale-[.98] " +
+  "disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 disabled:active:scale-100";
 
 export function Button({
   variante = "accent",

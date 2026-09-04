@@ -62,7 +62,7 @@ export default async function SeleccionarModuloPage() {
         <div className="grid w-full max-w-[1040px] grid-cols-1 gap-6 md:grid-cols-2 lg:gap-[26px]">
           <Link
             href="/learning"
-            className="flex flex-col rounded-card-xl border border-line bg-surface px-6 pb-7 pt-8 transition-shadow hover:border-accent hover:shadow-card-hover sm:px-8"
+            className="flex flex-col rounded-card-xl border border-line bg-surface px-6 pb-7 pt-8 transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-accent hover:shadow-card-hover sm:px-8"
           >
             <span className="grid h-[52px] w-[52px] place-items-center rounded-[13px] bg-accent-soft text-accent">
               <IconLearning size={26} />
@@ -98,7 +98,7 @@ export default async function SeleccionarModuloPage() {
 
           <Link
             href={destinoTalent}
-            className="flex flex-col rounded-card-xl border border-line bg-surface px-6 pb-7 pt-8 transition-shadow hover:border-steel hover:shadow-card-hover-steel sm:px-8"
+            className="flex flex-col rounded-card-xl border border-line bg-surface px-6 pb-7 pt-8 transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-1 hover:border-steel hover:shadow-card-hover-steel sm:px-8"
           >
             <span className="grid h-[52px] w-[52px] place-items-center rounded-[13px] bg-steel-soft text-steel">
               <IconTalent size={26} />
