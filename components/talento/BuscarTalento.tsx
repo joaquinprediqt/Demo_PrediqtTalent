@@ -15,13 +15,15 @@ interface Props {
   sedes: readonly string[];
   areas: readonly string[];
   habilidades: readonly string[];
+  /** Filtros que llegan en la URL, para entrar desde el tablero ya filtrado. */
+  inicial?: { readonly q?: string; readonly sede?: string; readonly area?: string };
 }
 
 /** Pantalla 5.4 — filtros sobre los perfiles que vienen de la base. */
-export function BuscarTalento({ candidatos, sedes, areas, habilidades }: Props) {
-  const [texto, setTexto] = useState("");
-  const [sede, setSede] = useState(TODAS);
-  const [area, setArea] = useState(TODAS);
+export function BuscarTalento({ candidatos, sedes, areas, habilidades, inicial }: Props) {
+  const [texto, setTexto] = useState(inicial?.q ?? "");
+  const [sede, setSede] = useState(inicial?.sede ?? TODAS);
+  const [area, setArea] = useState(inicial?.area ?? TODAS);
 
   /** Habilidades del catálogo mencionadas en el texto de búsqueda. */
   const habilidadesBuscadas = useMemo(() => {

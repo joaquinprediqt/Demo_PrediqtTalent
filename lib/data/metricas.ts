@@ -19,7 +19,21 @@ export function colorPorIndice(paleta: readonly string[], indice: number): strin
   return paleta[indice % paleta.length] ?? "#4A7FA7";
 }
 
-export const MESES_AVANCE = ["mar", "abr", "may", "jun", "jul", "ago"] as const;
+/**
+ * Serie del area chart, en la caja 400x120 del canvas. Las coordenadas son las
+ * del diseno; el porcentaje se deduce de la misma escala (y=120 es 0%, y=0 es
+ * 100%), asi que la curva y las etiquetas no pueden discrepar.
+ *
+ * Sigue siendo una serie de referencia: la demo no guarda cortes mensuales.
+ */
+export const SERIE_AVANCE = [
+  { mes: "mar", x: 10, y: 96 },
+  { mes: "abr", x: 88, y: 84 },
+  { mes: "may", x: 166, y: 70 },
+  { mes: "jun", x: 244, y: 52 },
+  { mes: "jul", x: 322, y: 40 },
+  { mes: "ago", x: 390, y: 26 },
+].map((punto) => ({ ...punto, valor: Math.round(((120 - punto.y) / 120) * 100) }));
 
 /** Trazado literal del area chart del canvas, en caja 400x120. */
 export const RUTA_AVANCE = "M10 96 L88 84 L166 70 L244 52 L322 40 L390 26";

@@ -9,7 +9,11 @@ import {
 } from "@/lib/db/consultas";
 
 /** Pantalla 5.4 — Búsqueda de talento interno. */
-export default async function BuscarTalentoPage() {
+export default async function BuscarTalentoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; sede?: string; area?: string }>;
+}) {
   const sesion = await sesionActual();
   if (!sesion) redirect("/login");
 
@@ -26,12 +30,15 @@ export default async function BuscarTalentoPage() {
     );
   }
 
+  const { q, sede, area } = await searchParams;
+
   return (
     <BuscarTalento
       candidatos={listarCandidatos()}
       sedes={sedesDisponibles()}
       areas={areasDisponibles()}
       habilidades={catalogoHabilidades().map((h) => h.nombre)}
+      inicial={{ q, sede, area }}
     />
   );
 }
