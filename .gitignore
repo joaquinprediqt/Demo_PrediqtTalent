@@ -37,3 +37,9 @@ npm-debug.log*
 
 # Documentos generados (Word, Excel, PPT, PDF): son entregables, no codigo.
 /docs/
+
+# Ajustes locales de Docker Compose. Compose carga este archivo solo, encima
+# de docker-compose.yml, y sirve para lo que cambia de una maquina a otra: por
+# ejemplo sacar la base SQLite del volumen con nombre a un bind mount, para
+# poder abrirla con DB Browser for SQLite. No pertenece al repositorio.
+docker-compose.override.yml
